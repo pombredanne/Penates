@@ -1,0 +1,1 @@
+cn=admin,{{ penates_domain|hostname_to_dn }}#{{ ldap_root_password|str_to_hex }}

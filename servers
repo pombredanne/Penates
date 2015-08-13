@@ -1,0 +1,16 @@
+[all_servers:children]
+auth_servers
+
+[auth_servers]
+ldap
+
+[auth_servers:vars]
+ldap_root_password=toto
+kerberos_master_password=toto
+directory_fqdn=directory01.{{ penates_domain }}
+
+[all_servers:vars]
+penates_domain=test.example.org
+penates_auth_server_ip=192.168.56.101
+penates_router=192.168.56.1
+penates_subnet=192.168.56.1/24

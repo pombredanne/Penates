@@ -1,0 +1,69 @@
+dn: {{ penates_domain|hostname_to_dn}}
+objectClass: top
+objectClass: dcObject
+objectclass: organization
+o: Organization
+dc: {{ penates_domain|hostname_to_dn_first }}
+description: Organization
+
+# Admin user.
+dn: cn=admin,{{ penates_domain|hostname_to_dn}}
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+cn: admin
+description: LDAP administrator
+userPassword: secret
+
+dn: ou=Users,{{ penates_domain|hostname_to_dn}}
+objectClass: organizationalUnit
+ou: organization users
+
+dn: ou=Groups,{{ penates_domain|hostname_to_dn}}
+objectClass: organizationalUnit
+ou: organization groups
+
+dn: ou=Computers,{{ penates_domain|hostname_to_dn}}
+objectClass: organizationalUnit
+ou: organization computers
+
+dn: ou=Services,{{ penates_domain|hostname_to_dn}}
+objectClass: organizationalUnit
+ou: network services
+
+dn: ou=dhcp,ou=Services,{{ penates_domain|hostname_to_dn}}
+ou: dhcp
+objectClass: top
+objectClass: organizationalUnit
+description: DHCP Servers
+
+dn: cn=dhcp01,ou=dhcp,ou=Services,{{ penates_domain|hostname_to_dn}}
+cn: dhcp01
+objectClass: top
+objectClass: dhcpServer
+dhcpServiceDN: cn=config,ou=dhcp,ou=Services,{{ penates_domain|hostname_to_dn}}
+
+dn: cn=config,ou=dhcp,ou=Services,{{ penates_domain|hostname_to_dn}}
+cn: config
+objectClass: top
+objectClass: dhcpService
+dhcpPrimaryDN:  cn=dhcp01,ou=dhcp,ou=Services,{{ penates_domain|hostname_to_dn}}
+dhcpStatements: ddns-update-style none
+dhcpStatements: get-lease-hostnames true
+dhcpStatements: use-host-decl-names true
+
+dn: cn={{ penates_subnet|subnet_address }},cn=config,ou=dhcp,ou=Services,{{ penates_domain|hostname_to_dn}}
+cn: {{ penates_subnet|subnet_address }}
+objectClass: top
+objectClass: dhcpSubnet
+objectClass: dhcpOptions
+dhcpNetMask: {{ penates_subnet|subnet_mask_len }}
+dhcpRange: {{ penates_subnet|subnet_start }} {{ penates_subnet|subnet_end }}
+dhcpStatements: default-lease-time 600
+dhcpStatements: max-lease-time 7200
+dhcpOption: domain-name-servers {{ penates_auth_server_ip }}
+dhcpOption: domain-name "{{ penates_domain }}"
+dhcpOption: broadcast-address {{ penates_subnet|subnet_broadcast }}
+dhcpOption: nis-domain "{{ penates_domain }}"
+dhcpOption: netbios-name-servers {{ penates_auth_server_ip }}
+dhcpOption: subnet-mask {{ penates_subnet|subnet_mask }}
+dhcpOption: routers {{ penates_router }}

@@ -1,0 +1,16 @@
+---
+- hosts: all_servers
+  remote_user: root
+  tasks:
+  - name: install Kerberos
+    apt: pkg=krb5-user state=latest
+  - name: copy Kerberos configuration
+    template: src=templates/common/krb5.conf dest=/etc/krb5.conf
+  - name: install vim
+    apt: pkg=vim state=latest
+
+  - name: install ufw
+    apt: pkg=ufw state=latest
+  - ufw: rule=limit port=ssh proto=tcp
+  - name: ufw configuration
+    ufw: state=enabled policy=allow
