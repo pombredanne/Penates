@@ -15,8 +15,8 @@ Group of Ansible tasks for configuring a basic private network with the followin
 Newly installed machines should register themselves to these services:
 
   * create a DHCP entry for each MAC to fix IP addresses
-  * create a DNS entry for the fqdn
+  * create a DNS A/AAAA entry for the fqdn
+  * create a DNS PTR entry for the fqdn 
   * create a certificate
   * crate a Kerberos principal for the HOST/ keytab
-  * create a netgroup LDAP entry for admin rights
   

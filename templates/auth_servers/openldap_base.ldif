@@ -16,24 +16,43 @@ userPassword: secret
 
 dn: ou=Users,{{ penates_domain|hostname_to_dn}}
 objectClass: organizationalUnit
-ou: organization users
+ou: Users
 
 dn: ou=Groups,{{ penates_domain|hostname_to_dn}}
 objectClass: organizationalUnit
-ou: organization groups
+ou: Groups
+
+dn: ou=netgroup,{{ penates_domain|hostname_to_dn}}
+objectClass: organizationalUnit
+ou: netgroup
 
 dn: ou=Computers,{{ penates_domain|hostname_to_dn}}
 objectClass: organizationalUnit
-ou: organization computers
+ou: Computers
+
+dn: cn={{ penates_administrators_group }},ou=Groups,{{ penates_domain|hostname_to_dn}}
+objectClass: posixGroup
+cn: {{ penates_administrators_group }}
+gidNumber: 10000
+
+dn: cn={{ penates_users_group }},ou=Groups,{{ penates_domain|hostname_to_dn}}
+objectClass: posixGroup
+cn: {{ penates_users_group }}
+gidNumber: 10001
+
+dn: cn={{ penates_guests_group }},ou=Groups,{{ penates_domain|hostname_to_dn}}
+objectClass: posixGroup
+cn: {{ penates_guests_group }}
+gidNumber: 10002
 
 dn: ou=Services,{{ penates_domain|hostname_to_dn}}
 objectClass: organizationalUnit
-ou: network services
+ou: Services
 
 dn: ou=dhcp,ou=Services,{{ penates_domain|hostname_to_dn}}
-ou: dhcp
 objectClass: top
 objectClass: organizationalUnit
+ou: dhcp
 description: DHCP Servers
 
 dn: cn=dhcp01,ou=dhcp,ou=Services,{{ penates_domain|hostname_to_dn}}

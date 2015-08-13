@@ -4,6 +4,7 @@
     domain_name: test.org
   remote_user: root
   tasks:
+
   - name: ensure OpenLDAP is at the latest version
     apt: pkg=slapd state=latest
     tags:
@@ -16,11 +17,6 @@
     apt: pkg=isc-dhcp-server-ldap state=latest
     tags:
       - ldap
-  - name: ensure postgresql-9.4 is at the latest version
-    apt: pkg=postgresql-9.4 state=latest
-    tags:
-      - dns
-
   - name: copy kerberos.ldif
     copy: src=files/auth_servers/kerberos.ldif dest=/etc/ldap/schema/kerberos.ldif
     tags:
@@ -62,7 +58,7 @@
     tags:
       - ldap
   - name: import configuration
-    shell: ldapadd -c -x -D cn=admin,{{ penates_domain|hostname_to_dn }} -w {{ ldap_root_password }} -f base.ldif | true
+    shell: ldapadd -c -x -D cn=admin,{{ penates_domain|hostname_to_dn }} -w {{ ldap_root_password }} -f /etc/ldap/base.ldif | true
     tags:
       - ldap
   - name: restart OpenLDAP
@@ -135,3 +131,11 @@
     ufw: rule=allow port=67 proto=udp
     tags:
       - dhcp
+
+  - name: ensure postgresql-9.4 is at the latest version
+    apt: pkg=postgresql-9.4 state=latest
+    tags:
+      - dns
+      - pki
+  - name:
+    user: name=penatesserver home=/var/penatesserver createhome=yes
