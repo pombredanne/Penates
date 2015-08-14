@@ -14,27 +14,25 @@ olcRootDN: cn=admin,{{ penates_domain|hostname_to_dn }}
 replace: olcRootPW
 olcRootPW: {{ ldap_root_password }}
 -
-replace: olcDbConfig
-olcDbConfig: set_cachesize 0 2097152 0
-olcDbConfig: set_lk_max_objects 1500
-olcDbConfig: set_lk_max_locks 1500
-olcDbConfig: set_lk_max_lockers 1500
--
 replace: olcDbIndex
 olcDbIndex: objectClass eq
 olcDbIndex: krbPrincipalName eq,pres,sub
 olcDbIndex: cn eq
-olcDbIndex: gidNumber eq
-olcDbIndex: memberUid eq
-olcDbIndex: uid eq
-olcDbIndex: uidNumber eq
-olcDbIndex: uniqueMember eq
+olcDbIndex: gidNumber eq,pres
+olcDbIndex: memberUid eq,pres,sub
+olcDbIndex: uid eq,pres,sub
+olcDbIndex: uidNumber eq,pres
+olcDbIndex: uniqueMember eq,pres
+olcDbIndex: loginShell eq
+olcDbIndex: sambaSID eq
+olcDbIndex: sambaPrimaryGroupSID eq
+olcDbIndex: sambaGroupType eq
+olcDbIndex: sambaSIDList eq
+olcDbIndex: sambaDomainName eq
+olcDbIndex: default sub
 -
 replace: olcLastMod
 olcLastMod: TRUE
--
-replace: olcDbCheckpoint
-olcDbCheckpoint: 512 30
 -
 replace: olcAccess
 olcAccess: to attrs=userPassword,shadowLastChange,krbPrincipalKey by dn="cn=admin,{{ penates_domain|hostname_to_dn }}" write by anonymous auth by self write by * none

@@ -14,3 +14,5 @@
   - ufw: rule=limit port=ssh proto=tcp
   - name: ufw configuration
     ufw: state=enabled policy=allow
+  - name: hosts configuration
+    template: src=templates/common/hosts dest=/etc/hosts

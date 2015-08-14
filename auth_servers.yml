@@ -25,6 +25,10 @@
     copy: src=files/auth_servers/dhcp.ldif dest=/etc/ldap/schema/dhcp.ldif
     tags:
       - ldap
+  - name: copy samba.ldif
+    copy: src=files/auth_servers/samba.ldif dest=/etc/ldap/schema/samba.ldif
+    tags:
+      - ldap
   - name: copy base OpenLDAP configuration
     template: src=templates/auth_servers/openldap_config.ldif dest=/etc/ldap/config.ldif
     tags:
@@ -47,6 +51,10 @@
       - ldap
   - name: import kerberos.ldif
     shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/kerberos.ldif | true
+    tags:
+      - ldap
+  - name: import samba.ldif
+    shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/samba.ldif | true
     tags:
       - ldap
   - name: import dhcp.ldif
@@ -86,8 +94,16 @@
     template: src=templates/auth_servers/service.keyfile dest=/etc/krb5kdc/service.keyfile
     tags:
       - kerberos
+  - name: copy Kerberos configuration
+    template: src=templates/auth_servers/kdc.conf dest=/etc/krb5kdc/kdc.conf
+    tags:
+      - kerberos
+  - name: copy Kerberos admin
+    template: src=templates/auth_servers/kadm5.acl dest=/etc/krb5kdc/kadm5.acl
+    tags:
+      - kerberos
   - name: configure LDAP for Kerberos
-    shell: kdb5_ldap_util -D cn=admin,{{ penates_domain|hostname_to_dn }} -w {{ ldap_root_password }} -H ldapi:/// create -subtrees cn=krbContainer,{{ penates_domain|hostname_to_dn }} -r {{ penates_domain|upper }} -P {{ kerberos_master_password }} -s | true
+    shell: kdb5_ldap_util -D cn=admin,{{ penates_domain|hostname_to_dn }} -w {{ ldap_root_password }} -H ldapi:/// create -subtrees cn=krbContainer,{{ penates_domain|hostname_to_dn }} -containerref cn=krbContainer,{{ penates_domain|hostname_to_dn }} -r {{ penates_domain|upper }} -P {{ kerberos_master_password }} -s | true
     tags:
       - kerberos
   - name: restart Kerberos admin

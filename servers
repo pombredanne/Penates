@@ -7,9 +7,9 @@ ldap
 [auth_servers:vars]
 ldap_root_password=toto
 kerberos_master_password=toto
-directory_fqdn=directory01.{{ penates_domain }}
 
 [all_servers:vars]
+penates_directory_fqdn=directory01.{{ penates_domain }}
 penates_domain=test.example.org
 penates_auth_server_ip=192.168.56.101
 penates_router=192.168.56.1
@@ -17,4 +17,3 @@ penates_subnet=192.168.56.1/24
 penates_administrators_group=Administrators
 penates_guests_group=Guests
 penates_users_group=Users
-
