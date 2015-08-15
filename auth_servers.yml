@@ -147,12 +147,6 @@
     command: penatesserver-manage certificate {{ penates_directory_fqdn }} Service --cert /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.crt --key /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.key
     tags:
       - ldap
-      - pki
-  - file: path=/var/penatesserver/data/static state=directory owner=penatesserver recurse=yes group=penatesserver
-    tags:
-      - pki
-      - ldap
-
   - name: copy OpenLDAP base content
     template: src=templates/auth_servers/openldap_base.ldif dest=/etc/ldap/base.ldif
     tags:
@@ -189,19 +183,25 @@
     shell: ldapadd -c -x -D cn=admin,{{ penates_domain|hostname_to_dn }} -w {{ ldap_root_password }} -f /etc/ldap/base.ldif | true
     tags:
       - ldap
-  - name: restart OpenLDAP
-    service: name=slapd state=restarted
-    tags:
-      - ldap
   - name: open TCP port for LDAP
     ufw: rule=allow port=636 proto=tcp
     tags:
       - ldap
   - file: path=/etc/ldap/config.ldif state=absent
+    tags:
       - ldap
   - file: path=/etc/ldap/base.ldif state=absent
+    tags:
       - ldap
   - file: path=/etc/ldap/slapd.d/{{ penates_directory_fqdn }}.key state=file owner=openldap mode=0400 group=openldap
+    tags:
+      - ldap
+  - lineinfile: regexp='SLAPD_SERVICES="ldap:/// ldapi:///"' line='SLAPD_SERVICES="ldap:/// ldapi:/// ldaps:///"' dest=/etc/default/slapd
+    tags:
+      - ldap
+  - name: restart OpenLDAP
+    service: name=slapd state=restarted
+    tags:
       - ldap
 
   - name: ensure krb5-kdc-ldap is at the latest version
@@ -218,6 +218,10 @@
       - kerberos
   - name: copy Kerberos LDAP password
     template: src=templates/auth_servers/service.keyfile dest=/etc/krb5kdc/service.keyfile
+    tags:
+      - kerberos
+  - name: create Kerberos certificate
+    command: penatesserver-manage certificate {{ penates_directory_fqdn }} "Kerberos DC" --cert /etc/krb5kdc/{{ penates_directory_fqdn }}.crt --key /etc/krb5kdc/{{ penates_directory_fqdn }}.key
     tags:
       - kerberos
   - name: copy Kerberos configuration
@@ -273,4 +277,8 @@
     ufw: rule=allow port=67 proto=udp
     tags:
       - dhcp
+
+  - file: path=/var/penatesserver/data state=directory owner=penatesserver recurse=yes group=penatesserver
+    tags:
+      - pki
 

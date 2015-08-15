@@ -1,12 +1,12 @@
 # TLS settings
 dn: cn=config
-add: olcTLSCACertificateFile
+replace: olcTLSCACertificateFile
 olcTLSCACertificateFile: /etc/ssl/certs/Penates_CA.pem
 -
-add: olcTLSCertificateFile
+replace: olcTLSCertificateFile
 olcTLSCertificateFile: /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.crt
 -
-add: olcTLSCertificateKeyFile
+replace: olcTLSCertificateKeyFile
 olcTLSCertificateKeyFile: /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.key
 
 # Database settings

@@ -6,6 +6,8 @@
     apt: pkg=krb5-user state=latest
   - name: copy Kerberos configuration
     template: src=templates/common/krb5.conf dest=/etc/krb5.conf
+  - name: copy LDAP configuration
+    template: src=templates/common/ldap.conf dest=/etc/ldap/ldap.conf
   - name: install vim
     apt: pkg=vim state=latest
 
@@ -19,9 +21,9 @@
   - name: CA root certificates
     apt: pkg=ca-certificates state=latest
   - name: CA root certificate (1/2)
-    copy: src=files/auth_servers/ca_cert.pem dest=/etc/ssl/certs/Penates_CA.pem mode=0644
+    template: src=files/auth_servers/ca_cert.pem dest=/etc/ssl/certs/Penates_CA.pem mode=0644
   - name: CA root certificate (2/2)
-    copy: src=files/auth_servers/ca_cert.pem dest=/usr/share/ca-certificates/Penates_CA.crt mode=0644
+    template: src=files/auth_servers/ca_cert.pem dest=/usr/share/ca-certificates/Penates_CA.crt mode=0644
   - name: config CA root certificate
     lineinfile: dest=/etc/ca-certificates.conf line=Penates_CA.crt state=present
   - name: Update CA certificates (1/2)
