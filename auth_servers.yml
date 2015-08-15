@@ -5,6 +5,116 @@
   remote_user: root
   tasks:
 
+  - name: ensure postgresql-9.4 is at the latest version
+    apt: pkg=postgresql-9.4 state=latest
+    tags:
+      - dns
+      - pki
+  - name: ensure pip is at the latest version
+    apt: pkg=python-pip state=latest
+    tags:
+      - pki
+  - name: ensure python-dev is at the latest version
+    apt: pkg=python-dev state=latest
+    tags:
+      - pki
+  - name: ensure libldap2-dev is at the latest version
+    apt: pkg=libldap2-dev state=latest
+    tags:
+      - pki
+  - name: ensure libsasl2-dev is at the latest version
+    apt: pkg=libsasl2-dev
+    tags:
+      - pki
+  - name: ensure libpq-dev is at the latest version
+    apt: pkg=libpq-dev
+    tags:
+      - pki
+  - name: ensure postgresql-client is at the latest version
+    apt: pkg=postgresql-client
+    tags:
+      - pki
+  - name: create penatesserver user
+    user: name=penatesserver home=/var/penatesserver createhome=yes
+    tags:
+      - pki
+  - pip: name=djangofloor
+    tags:
+      - pki
+  - pip: name=djangorestframework
+    tags:
+      - pki
+  - pip: name=markdown
+    tags:
+      - pki
+  - pip: name=django-filter
+    tags:
+      - pki
+  - pip: name=psycopg2
+    tags:
+      - pki
+  - pip: name=pygments
+    tags:
+      - pki
+  - pip: name=django-ldapdb
+    tags:
+      - pki
+  - git: repo=https://github.com/d9pouces/Penates-Server.git
+         dest=/var/penatesserver/src
+         update=yes
+    tags:
+      - pki
+  - shell: python setup.py develop
+    args:
+      chdir: /var/penatesserver/src
+    tags:
+      - pki
+  - file: path=/var/penatesserver/data/pki/private state=directory owner=penatesserver
+    tags:
+      - pki
+  - file: path=/var/penatesserver/data/static state=directory owner=penatesserver
+    tags:
+      - pki
+  - file: path=/var/penatesserver/data/log state=directory owner=penatesserver
+    tags:
+      - pki
+  - file: path=/var/penatesserver/data/data/media state=directory owner=penatesserver
+    tags:
+      - pki
+  - file: path=/etc/penatesserver/ state=directory owner=penatesserver
+    tags:
+      - pki
+  - copy: src=files/auth_servers/ca_cert.pem dest=/var/penatesserver/data/pki/cacert.pem owner=penatesserver mode=0644 group=penatesserver
+    tags:
+      - pki
+  - copy: src=files/auth_servers/ca_key.pem dest=/var/penatesserver/data/pki/private/cakey.pem owner=penatesserver mode=0600 group=penatesserver
+    tags:
+      - pki
+  - postgresql_user: name=penatesserver password={{ penatesserver_password }} role_attr_flags=NOSUPERUSER
+    name: create database user for PenatesServer
+    sudo_user: postgres
+    tags:
+      - pki
+  - postgresql_db: name=penatesserver owner=penatesserver encoding='UTF-8' lc_collate='fr_FR.UTF-8' lc_ctype='fr_FR.UTF-8'
+    name: create database for PenatesServer
+    sudo_user: postgres
+    tags:
+      - pki
+  - name: copy PenatesServer configuration
+    template: src=templates/auth_servers/penatesserver.ini dest=/etc/penatesserver/settings.ini owner=penatesserver group=penatesserver mode=0644
+    tags:
+      - pki
+  - name: initialize PKI
+    command: penatesserver-manage certificate --initialize {{ penates_domain }} CA
+    sudo_user: penatesserver
+    tags:
+      - pki
+  - name: prepare PKI database
+    command: penatesserver-manage migrate
+    sudo_user: penatesserver
+    tags:
+      - pki
+
   - name: ensure OpenLDAP is at the latest version
     apt: pkg=slapd state=latest
     tags:
@@ -33,6 +143,16 @@
     template: src=templates/auth_servers/openldap_config.ldif dest=/etc/ldap/config.ldif
     tags:
       - ldap
+  - name: create LDAP certificate
+    command: penatesserver-manage certificate {{ penates_directory_fqdn }} Service --cert /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.crt --key /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.key
+    tags:
+      - ldap
+      - pki
+  - file: path=/var/penatesserver/data/static state=directory owner=penatesserver recurse=yes group=penatesserver
+    tags:
+      - pki
+      - ldap
+
   - name: copy OpenLDAP base content
     template: src=templates/auth_servers/openldap_base.ldif dest=/etc/ldap/base.ldif
     tags:
@@ -76,6 +196,12 @@
   - name: open TCP port for LDAP
     ufw: rule=allow port=636 proto=tcp
     tags:
+      - ldap
+  - file: path=/etc/ldap/config.ldif state=absent
+      - ldap
+  - file: path=/etc/ldap/base.ldif state=absent
+      - ldap
+  - file: path=/etc/ldap/slapd.d/{{ penates_directory_fqdn }}.key state=file owner=openldap mode=0400 group=openldap
       - ldap
 
   - name: ensure krb5-kdc-ldap is at the latest version
@@ -148,10 +274,3 @@
     tags:
       - dhcp
 
-  - name: ensure postgresql-9.4 is at the latest version
-    apt: pkg=postgresql-9.4 state=latest
-    tags:
-      - dns
-      - pki
-  - name:
-    user: name=penatesserver home=/var/penatesserver createhome=yes
