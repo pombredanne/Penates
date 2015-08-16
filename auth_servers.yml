@@ -298,6 +298,64 @@
     tags:
       - dhcp
 
+  - apt: pkg=apache2
+    tags:
+      - pki
+  - apt: pkg=libapache2-mod-xsendfile
+    tags:
+      - pki
+  - apt: pkg=libapache2-mod-auth-kerb
+    tags:
+      - pki
+  - apache2_module: state=present name=auth_kerb
+    tags:
+      - pki
+  - apache2_module: state=present name=headers
+    tags:
+      - pki
+  - apache2_module: state=present name=proxy
+    tags:
+      - pki
+  - apache2_module: state=present name=proxy_http
+    tags:
+      - pki
+  - apache2_module: state=present name=ssl
+    tags:
+      - pki
+  - command: penatesserver-manage collectstatic --noinput
+    sudo_user: penatesserver
+    tags:
+      - pki
+  - name: register HTTP service
+    command: penatesserver-manage service https {{ penates_directory_fqdn }} 443 --role "Service" --fqdn {{ penates_directory_fqdn }} --description "Penates Webservices" --kerberos_service HTTP --keytab /etc/apache2/http.keytab --cert /etc/apache2/{{ penates_directory_fqdn }}.pem --key /etc/apache2/{{ penates_directory_fqdn }}.pem --ca /etc/apache2/{{ penates_directory_fqdn }}.pem
+    tags:
+      - pki
   - file: path=/var/penatesserver/data state=directory owner=penatesserver recurse=yes group=penatesserver
+    tags:
+      - pki
+  - file: path=/etc/apache2/http.keytab state=file owner=www-data group=www-data mode=0600
+    tags:
+      - pki
+  - file: path=/etc/apache2/{{ penates_directory_fqdn }}.pem state=file owner=www-data group=www-data mode=0600
+    tags:
+      - pki
+  - template: src=templates/auth_servers/penatesserver.conf dest=/etc/apache2/sites-available/{{ penates_directory_fqdn }}.conf owner=www-data group=www-data mode=0644
+    tags:
+      - pki
+  - file: path=/etc/apache2/sites-enabled/000-default.conf state=absent
+    tags:
+      - pki
+  - file: path=/etc/apache2/sites-enabled/000-default state=absent
+    tags:
+      - pki
+  - file: path=/etc/apache2/sites-enabled/{{ penates_directory_fqdn }}.conf src=/etc/apache2/sites-available/{{ penates_directory_fqdn }}.conf state=link
+    tags:
+      - pki
+  - name: copy penatesserver systemd configuration
+    template: src=templates/auth_servers/penatesserver-systemd.service dest=/etc/systemd/system/penatesserver-gunicorn.service
+    tags:
+      - pki
+
+  - service: name=apache2 state=restarted
     tags:
       - pki
