@@ -151,18 +151,18 @@
     template: src=templates/auth_servers/openldap_base.ldif dest=/etc/ldap/base.ldif
     tags:
       - ldap
-  - name: import cosine.ldif
-    shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/cosine.ldif | true
-    tags:
-      - ldap
-  - name: import nis.ldif
-    shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/nis.ldif | true
-    tags:
-      - ldap
-  - name: import inetorgperson.ldif
-    shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/inetorgperson.ldif | true
-    tags:
-      - ldap
+#  - name: import cosine.ldif
+#    shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/cosine.ldif | true
+#    tags:
+#      - ldap
+#  - name: import nis.ldif
+#    shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/nis.ldif | true
+#    tags:
+#      - ldap
+#  - name: import inetorgperson.ldif
+#    shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/inetorgperson.ldif | true
+#    tags:
+#      - ldap
   - name: import kerberos.ldif
     shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/kerberos.ldif | true
     tags:
@@ -180,7 +180,7 @@
     tags:
       - ldap
   - name: import configuration
-    shell: ldapadd -c -x -D cn=admin,{{ penates_domain|hostname_to_dn }} -w {{ ldap_root_password }} -f /etc/ldap/base.ldif | true
+    shell: ldapadd -c -x -D cn=admin,{{ penates_domain|hostname_to_dn }} -w {{ ldap_root_password }} -H ldapi:///  -f /etc/ldap/base.ldif | true
     tags:
       - ldap
   - name: open TCP port for LDAP
@@ -233,7 +233,7 @@
     tags:
       - kerberos
   - name: configure LDAP for Kerberos
-    shell: kdb5_ldap_util -D cn=admin,{{ penates_domain|hostname_to_dn }} -w {{ ldap_root_password }} -H ldapi:/// create -subtrees cn=krbContainer,{{ penates_domain|hostname_to_dn }} -containerref cn=krbContainer,{{ penates_domain|hostname_to_dn }} -r {{ penates_domain|upper }} -P {{ kerberos_master_password }} -s | true
+    shell: kdb5_ldap_util -D cn=admin,{{ penates_domain|hostname_to_dn }} -w {{ ldap_root_password }} -H ldapi:/// create -subtrees cn=krbContainer,{{ penates_domain|hostname_to_dn }} -r {{ penates_domain|upper }} -P {{ kerberos_master_password }} -s | true
     tags:
       - kerberos
   - name: restart Kerberos admin
