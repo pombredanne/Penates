@@ -143,8 +143,8 @@
     template: src=templates/auth_servers/openldap_config.ldif dest=/etc/ldap/config.ldif
     tags:
       - ldap
-  - name: create LDAP certificate
-    command: penatesserver-manage certificate {{ penates_directory_fqdn }} Service --cert /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.crt --key /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.key
+  - name: register LDAP service
+    command: penatesserver-manage service ldaps {{ penates_directory_fqdn }} 636 --fqdn {{ penates_directory_fqdn }} --description "Main LDAP server" --cert /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.crt --key /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.key
     tags:
       - ldap
   - name: copy OpenLDAP base content
@@ -220,8 +220,8 @@
     template: src=templates/auth_servers/service.keyfile dest=/etc/krb5kdc/service.keyfile
     tags:
       - kerberos
-  - name: create Kerberos certificate
-    command: penatesserver-manage certificate {{ penates_directory_fqdn }} "Kerberos DC" --cert /etc/krb5kdc/{{ penates_directory_fqdn }}.crt --key /etc/krb5kdc/{{ penates_directory_fqdn }}.key
+  - name: register Kerberos service
+    command: penatesserver-manage service krb {{ penates_directory_fqdn }} 88 --role "Kerberos DC" --fqdn {{ penates_directory_fqdn }} --description "Main Kerberos server" --cert /etc/krb5kdc/{{ penates_directory_fqdn }}.crt --key /etc/krb5kdc/{{ penates_directory_fqdn }}.key
     tags:
       - kerberos
   - name: copy Kerberos configuration
@@ -256,6 +256,22 @@
     ufw: rule=allow port=749 proto=tcp
     tags:
       - kerberos
+  - name: create Kerberos admin principal for PenatesServer
+    command: penatesserver-manage keytab penatesserver/admin
+    tags:
+      - pki
+      - kerberos
+  - name: remove keytab for PenatesServer
+    file: path=/var/penatesserver/data/pki/private/kadmin.keytab state=absent
+    tags:
+      - pki
+      - kerberos
+
+  - name: export to keytab for PenatesServer
+    command: kadmin.local -q "ktadd -k /var/penatesserver/data/pki/private/kadmin.keytab penatesserver/admin"
+    tags:
+      - pki
+      - kerberos
 
   - name: ensure isc-dhcp-server is at the latest version
     apt: pkg=isc-dhcp-server state=latest
@@ -277,8 +293,11 @@
     ufw: rule=allow port=67 proto=udp
     tags:
       - dhcp
+  - name: register DHCP service
+    command: penatesserver-manage service dhcp {{ penates_directory_fqdn }} 67 --role "Service" --fqdn {{ penates_directory_fqdn }} --description "Main DHCP server"
+    tags:
+      - dhcp
 
   - file: path=/var/penatesserver/data state=directory owner=penatesserver recurse=yes group=penatesserver
     tags:
       - pki
-

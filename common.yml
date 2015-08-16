@@ -4,6 +4,8 @@
   tasks:
   - name: install Kerberos
     apt: pkg=krb5-user state=latest
+  - name: install curl
+    apt: pkg=curl state=latest
   - name: copy Kerberos configuration
     template: src=templates/common/krb5.conf dest=/etc/krb5.conf
   - name: copy LDAP configuration
