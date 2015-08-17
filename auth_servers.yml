@@ -9,111 +9,132 @@
     apt: pkg=postgresql-9.4 state=latest
     tags:
       - powerdns
-      - pki
+      - penatesserver
   - name: ensure pip is at the latest version
     apt: pkg=python-pip state=latest
     tags:
-      - pki
+      - penatesserver
   - name: ensure python-dev is at the latest version
     apt: pkg=python-dev state=latest
     tags:
-      - pki
+      - penatesserver
   - name: ensure libldap2-dev is at the latest version
     apt: pkg=libldap2-dev state=latest
     tags:
-      - pki
+      - penatesserver
   - name: ensure libsasl2-dev is at the latest version
     apt: pkg=libsasl2-dev
     tags:
-      - pki
+      - penatesserver
   - name: ensure libpq-dev is at the latest version
     apt: pkg=libpq-dev
     tags:
-      - pki
+      - penatesserver
   - name: ensure postgresql-client is at the latest version
     apt: pkg=postgresql-client
     tags:
-      - pki
+      - penatesserver
   - name: create penatesserver user
     user: name=penatesserver home=/var/penatesserver createhome=yes
     tags:
-      - pki
+      - penatesserver
   - pip: name=djangofloor
     tags:
-      - pki
+      - penatesserver
   - pip: name=djangorestframework
     tags:
-      - pki
+      - penatesserver
   - pip: name=markdown
     tags:
-      - pki
+      - penatesserver
   - pip: name=django-filter
     tags:
-      - pki
+      - penatesserver
   - pip: name=psycopg2
     tags:
-      - pki
+      - penatesserver
   - pip: name=pygments
     tags:
-      - pki
+      - penatesserver
+  - pip: name=django-powerdns-manager==0.2.1a1
+    tags:
+      - penatesserver
   - pip: name=django-ldapdb
     tags:
-      - pki
+      - penatesserver
   - git: repo=https://github.com/d9pouces/Penates-Server.git
          dest=/var/penatesserver/src
          update=yes
     tags:
-      - pki
+      - penatesserver
   - shell: python setup.py develop
     args:
       chdir: /var/penatesserver/src
     tags:
-      - pki
+      - penatesserver
   - file: path=/var/penatesserver/data/pki/private state=directory owner=penatesserver
     tags:
-      - pki
+      - penatesserver
   - file: path=/var/penatesserver/data/static state=directory owner=penatesserver
     tags:
-      - pki
+      - penatesserver
   - file: path=/var/penatesserver/data/log state=directory owner=penatesserver
     tags:
-      - pki
+      - penatesserver
   - file: path=/var/penatesserver/data/data/media state=directory owner=penatesserver
     tags:
-      - pki
+      - penatesserver
   - file: path=/etc/penatesserver/ state=directory owner=penatesserver
     tags:
-      - pki
+      - penatesserver
   - copy: src=files/auth_servers/ca_cert.pem dest=/var/penatesserver/data/pki/cacert.pem owner=penatesserver mode=0644 group=penatesserver
     tags:
-      - pki
+      - penatesserver
   - copy: src=files/auth_servers/ca_key.pem dest=/var/penatesserver/data/pki/private/cakey.pem owner=penatesserver mode=0600 group=penatesserver
     tags:
-      - pki
+      - penatesserver
   - postgresql_user: name=penatesserver password={{ penatesserver_password }} role_attr_flags=NOSUPERUSER
     name: create database user for PenatesServer
     sudo_user: postgres
     tags:
-      - pki
+      - penatesserver
   - postgresql_db: name=penatesserver owner=penatesserver encoding='UTF-8' lc_collate='fr_FR.UTF-8' lc_ctype='fr_FR.UTF-8'
     name: create database for PenatesServer
     sudo_user: postgres
     tags:
-      - pki
+      - penatesserver
+  - postgresql_user: name=powerdns password={{ powerdns_password }} role_attr_flags=NOSUPERUSER
+    name: create database user for powerdns
+    sudo_user: postgres
+    tags:
+      - powerdns
+      - penatesserver
+  - postgresql_db: name=powerdns owner=powerdns encoding='UTF-8' lc_collate='fr_FR.UTF-8' lc_ctype='fr_FR.UTF-8'
+    name: create database for powerdns
+    sudo_user: postgres
+    tags:
+      - powerdns
+      - penatesserver
   - name: copy PenatesServer configuration
     template: src=templates/auth_servers/penatesserver.ini dest=/etc/penatesserver/settings.ini owner=penatesserver group=penatesserver mode=0644
     tags:
-      - pki
+      - penatesserver
   - name: initialize PKI
     command: penatesserver-manage certificate --initialize {{ penates_domain }} CA
     sudo_user: penatesserver
     tags:
-      - pki
-  - name: prepare PKI database
+      - penatesserver
+  - name: prepare PowerDNS database
     command: penatesserver-manage migrate
     sudo_user: penatesserver
     tags:
-      - pki
+      - penatesserver
+  - name: prepare PKI database
+    command: penatesserver-manage migrate --database powerdns
+    sudo_user: penatesserver
+    tags:
+      - penatesserver
+      - powerdns
 
   - name: ensure OpenLDAP is at the latest version
     apt: pkg=slapd state=latest
@@ -259,18 +280,18 @@
   - name: create Kerberos admin principal for PenatesServer
     command: penatesserver-manage keytab penatesserver/admin
     tags:
-      - pki
+      - penatesserver
       - kerberos
   - name: remove keytab for PenatesServer
     file: path=/var/penatesserver/data/pki/private/kadmin.keytab state=absent
     tags:
-      - pki
+      - penatesserver
       - kerberos
 
   - name: export to keytab for PenatesServer
     command: kadmin.local -q "ktadd -k /var/penatesserver/data/pki/private/kadmin.keytab penatesserver/admin"
     tags:
-      - pki
+      - penatesserver
       - kerberos
 
   - name: ensure isc-dhcp-server is at the latest version
@@ -300,86 +321,65 @@
 
   - apt: pkg=apache2
     tags:
-      - pki
+      - penatesserver
   - apt: pkg=libapache2-mod-xsendfile
     tags:
-      - pki
+      - penatesserver
   - apt: pkg=libapache2-mod-auth-kerb
     tags:
-      - pki
+      - penatesserver
   - apache2_module: state=present name=auth_kerb
     tags:
-      - pki
+      - penatesserver
   - apache2_module: state=present name=headers
     tags:
-      - pki
+      - penatesserver
   - apache2_module: state=present name=proxy
     tags:
-      - pki
+      - penatesserver
   - apache2_module: state=present name=proxy_http
     tags:
-      - pki
+      - penatesserver
   - apache2_module: state=present name=ssl
     tags:
-      - pki
+      - penatesserver
   - command: penatesserver-manage collectstatic --noinput
     sudo_user: penatesserver
     tags:
-      - pki
+      - penatesserver
   - name: register HTTP service
     command: penatesserver-manage service https {{ penates_directory_fqdn }} 443 --role "Service" --fqdn {{ penates_directory_fqdn }} --description "Penates Webservices" --kerberos_service HTTP --keytab /etc/apache2/http.keytab --cert /etc/apache2/{{ penates_directory_fqdn }}.pem --key /etc/apache2/{{ penates_directory_fqdn }}.pem --ca /etc/apache2/{{ penates_directory_fqdn }}.pem
     tags:
-      - pki
+      - penatesserver
   - file: path=/var/penatesserver/data state=directory owner=penatesserver recurse=yes group=penatesserver
     tags:
-      - pki
+      - penatesserver
   - file: path=/etc/apache2/http.keytab state=file owner=www-data group=www-data mode=0600
     tags:
-      - pki
+      - penatesserver
   - file: path=/etc/apache2/{{ penates_directory_fqdn }}.pem state=file owner=www-data group=www-data mode=0600
     tags:
-      - pki
+      - penatesserver
   - template: src=templates/auth_servers/penatesserver.conf dest=/etc/apache2/sites-available/{{ penates_directory_fqdn }}.conf owner=www-data group=www-data mode=0644
     tags:
-      - pki
+      - penatesserver
   - file: path=/etc/apache2/sites-enabled/000-default.conf state=absent
     tags:
-      - pki
+      - penatesserver
   - file: path=/etc/apache2/sites-enabled/000-default state=absent
     tags:
-      - pki
+      - penatesserver
   - file: path=/etc/apache2/sites-enabled/{{ penates_directory_fqdn }}.conf src=/etc/apache2/sites-available/{{ penates_directory_fqdn }}.conf state=link
     tags:
-      - pki
+      - penatesserver
   - name: copy penatesserver systemd configuration
     template: src=templates/auth_servers/penatesserver-systemd.service dest=/etc/systemd/system/penatesserver-gunicorn.service
     tags:
-      - pki
+      - penatesserver
   - service: name=apache2 state=restarted
     tags:
-      - pki
+      - penatesserver
 
-  - copy: src=files/auth_servers/powerdns.sql dest=/tmp/powerdns.sql
-    tags:
-      - powerdns
-  - postgresql_user: name=powerdns password={{ powerdns_password }} role_attr_flags=NOSUPERUSER
-    name: create database user for powerdns
-    sudo_user: postgres
-    tags:
-      - powerdns
-  - postgresql_db: name=powerdns owner=powerdns encoding='UTF-8' lc_collate='fr_FR.UTF-8' lc_ctype='fr_FR.UTF-8'
-    name: create database for powerdns
-    sudo_user: postgres
-    tags:
-      - powerdns
-  - command: psql -d powerdns -X -h localhost -p 5432 -U powerdns -w -f /tmp/powerdns.sql
-    environment:
-      PGPASSWORD: {{ powerdns_password }}
-    tags:
-      - powerdns
-  - file: path=/tmp/powerdns.sql state=absent
-    tags:
-      - powerdns
   - apt: pkg=pdns-backend-pgsql state=latest
     tags:
       - powerdns
@@ -392,15 +392,19 @@
   - apt: pkg=pdns-recursor state=latest
     tags:
       - powerdns
-  - template: src=templates/auth_servers/pdns.conf dest=/etc/powerdns/pdns.conf owner=powerdns group=powerdns mode=0644
+  - template: src=templates/auth_servers/pdns.conf dest=/etc/powerdns/pdns.conf owner=pdns group=pdns mode=0644
     tags:
       - powerdns
-  - template: src=templates/auth_servers/recursor.conf dest=/etc/powerdns/recursor.conf owner=powerdns group=powerdns mode=0644
+  - template: src=templates/auth_servers/recursor.conf dest=/etc/powerdns/recursor.conf owner=pdns group=pdns mode=0644
     tags:
       - powerdns
   - service: name=pdns state=restarted
     tags:
       - powerdns
   - service: name=pdns-recursor state=restarted
+    tags:
+      - powerdns
+  - name: open TCP port for PowerDNS
+    ufw: rule=allow port=53 proto=udp
     tags:
       - powerdns
