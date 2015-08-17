@@ -8,7 +8,7 @@
   - name: ensure postgresql-9.4 is at the latest version
     apt: pkg=postgresql-9.4 state=latest
     tags:
-      - dns
+      - powerdns
       - pki
   - name: ensure pip is at the latest version
     apt: pkg=python-pip state=latest
@@ -151,18 +151,18 @@
     template: src=templates/auth_servers/openldap_base.ldif dest=/etc/ldap/base.ldif
     tags:
       - ldap
-#  - name: import cosine.ldif
-#    shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/cosine.ldif | true
-#    tags:
-#      - ldap
-#  - name: import nis.ldif
-#    shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/nis.ldif | true
-#    tags:
-#      - ldap
-#  - name: import inetorgperson.ldif
-#    shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/inetorgperson.ldif | true
-#    tags:
-#      - ldap
+  - name: import cosine.ldif
+    shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/cosine.ldif | true
+    tags:
+      - ldap
+  - name: import nis.ldif
+    shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/nis.ldif | true
+    tags:
+      - ldap
+  - name: import inetorgperson.ldif
+    shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/inetorgperson.ldif | true
+    tags:
+      - ldap
   - name: import kerberos.ldif
     shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/kerberos.ldif | true
     tags:
@@ -355,7 +355,52 @@
     template: src=templates/auth_servers/penatesserver-systemd.service dest=/etc/systemd/system/penatesserver-gunicorn.service
     tags:
       - pki
-
   - service: name=apache2 state=restarted
     tags:
       - pki
+
+  - copy: src=files/auth_servers/powerdns.sql dest=/tmp/powerdns.sql
+    tags:
+      - powerdns
+  - postgresql_user: name=powerdns password={{ powerdns_password }} role_attr_flags=NOSUPERUSER
+    name: create database user for powerdns
+    sudo_user: postgres
+    tags:
+      - powerdns
+  - postgresql_db: name=powerdns owner=powerdns encoding='UTF-8' lc_collate='fr_FR.UTF-8' lc_ctype='fr_FR.UTF-8'
+    name: create database for powerdns
+    sudo_user: postgres
+    tags:
+      - powerdns
+  - command: psql -d powerdns -X -h localhost -p 5432 -U powerdns -w -f /tmp/powerdns.sql
+    environment:
+      PGPASSWORD: {{ powerdns_password }}
+    tags:
+      - powerdns
+  - file: path=/tmp/powerdns.sql state=absent
+    tags:
+      - powerdns
+  - apt: pkg=pdns-backend-pgsql state=latest
+    tags:
+      - powerdns
+  - apt: pkg=dnsutils state=latest
+    tags:
+      - powerdns
+  - apt: pkg=pdns-server state=latest
+    tags:
+      - powerdns
+  - apt: pkg=pdns-recursor state=latest
+    tags:
+      - powerdns
+  - template: src=templates/auth_servers/pdns.conf dest=/etc/powerdns/pdns.conf owner=powerdns group=powerdns mode=0644
+    tags:
+      - powerdns
+  - template: src=templates/auth_servers/recursor.conf dest=/etc/powerdns/recursor.conf owner=powerdns group=powerdns mode=0644
+    tags:
+      - powerdns
+  - service: name=pdns state=restarted
+    tags:
+      - powerdns
+  - service: name=pdns-recursor state=restarted
+    tags:
+      - powerdns

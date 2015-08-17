@@ -8,6 +8,7 @@ ldap
 ldap_root_password=toto
 kerberos_master_password=toto
 penatesserver_password=toto
+powerdns_password=toto
 
 [all_servers:vars]
 penates_directory_fqdn=directory01.{{ penates_domain }}
@@ -22,3 +23,5 @@ penates_country = FR
 penates_organization = EXAMPLE
 penates_state = Ile-de-France
 penates_locality = Paris
+penates_backup_dns_1=8.8.8.8
+penates_backup_dns_2=8.8.4.4
