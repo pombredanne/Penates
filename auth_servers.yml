@@ -44,6 +44,9 @@
   - pip: name=djangorestframework
     tags:
       - penatesserver
+  - pip: name=netaddr
+    tags:
+      - penatesserver
   - pip: name=markdown
     tags:
       - penatesserver
@@ -103,22 +106,36 @@
     sudo_user: postgres
     tags:
       - penatesserver
+  - name: copy PenatesServer configuration
+    template: src=templates/auth_servers/penatesserver.ini dest=/etc/penatesserver/settings.ini owner=penatesserver group=penatesserver mode=0644
+    tags:
+      - penatesserver
+  - copy: src=files/auth_servers/powerdns.sql dest=/tmp/powerdns.sql
+    tags:
+      - powerdns
+      - pki
   - postgresql_user: name=powerdns password={{ powerdns_password }} role_attr_flags=NOSUPERUSER
     name: create database user for powerdns
     sudo_user: postgres
     tags:
       - powerdns
-      - penatesserver
+      - pki
   - postgresql_db: name=powerdns owner=powerdns encoding='UTF-8' lc_collate='fr_FR.UTF-8' lc_ctype='fr_FR.UTF-8'
     name: create database for powerdns
     sudo_user: postgres
     tags:
       - powerdns
-      - penatesserver
-  - name: copy PenatesServer configuration
-    template: src=templates/auth_servers/penatesserver.ini dest=/etc/penatesserver/settings.ini owner=penatesserver group=penatesserver mode=0644
+      - pki
+  - command: psql -d powerdns -X -h localhost -p 5432 -U powerdns -w -f /tmp/powerdns.sql
+    environment:
+      PGPASSWORD: "{{ powerdns_password }}"
     tags:
-      - penatesserver
+      - powerdns
+      - pki
+  - file: path=/tmp/powerdns.sql state=absent
+    tags:
+      - powerdns
+      - pki
   - name: initialize PKI
     command: penatesserver-manage certificate --initialize {{ penates_domain }} CA
     sudo_user: penatesserver
@@ -129,9 +146,8 @@
     sudo_user: penatesserver
     tags:
       - penatesserver
-  - name: prepare PKI database
-    command: penatesserver-manage migrate --database powerdns
-    sudo_user: penatesserver
+  - name: create base domain
+    command: penatesserver-manage ensure_domain {{ penates_domain }}
     tags:
       - penatesserver
       - powerdns
@@ -406,5 +422,9 @@
       - powerdns
   - name: open TCP port for PowerDNS
     ufw: rule=allow port=53 proto=udp
+    tags:
+      - powerdns
+  - name: register DNS service
+    command: penatesserver-manage service dns {{ penates_directory_fqdn }} 53 --role "Service" --fqdn {{ penates_directory_fqdn }} --description "Main DNS server"
     tags:
       - powerdns
