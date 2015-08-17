@@ -181,7 +181,7 @@
     tags:
       - ldap
   - name: register LDAP service
-    command: penatesserver-manage service ldaps {{ penates_directory_fqdn }} 636 --fqdn {{ penates_directory_fqdn }} --description "Main LDAP server" --cert /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.crt --key /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.key
+    command: penatesserver-manage service ldaps {{ penates_directory_fqdn }} 636 --fqdn {{ hostname }} --description "Main LDAP server" --cert /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.crt --key /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.key
     tags:
       - ldap
   - name: copy OpenLDAP base content
@@ -258,7 +258,7 @@
     tags:
       - kerberos
   - name: register Kerberos service
-    command: penatesserver-manage service krb {{ penates_directory_fqdn }} 88 --role "Kerberos DC" --fqdn {{ penates_directory_fqdn }} --description "Main Kerberos server" --cert /etc/krb5kdc/{{ penates_directory_fqdn }}.crt --key /etc/krb5kdc/{{ penates_directory_fqdn }}.key
+    command: penatesserver-manage service krb {{ penates_directory_fqdn }} 88 --role "Kerberos DC" --fqdn {{ hostname }} --description "Main Kerberos server" --cert /etc/krb5kdc/{{ penates_directory_fqdn }}.crt --key /etc/krb5kdc/{{ penates_directory_fqdn }}.key
     tags:
       - kerberos
   - name: copy Kerberos configuration
@@ -331,7 +331,7 @@
     tags:
       - dhcp
   - name: register DHCP service
-    command: penatesserver-manage service dhcp {{ penates_directory_fqdn }} 67 --role "Service" --fqdn {{ penates_directory_fqdn }} --description "Main DHCP server"
+    command: penatesserver-manage service dhcp {{ penates_directory_fqdn }} 67 --role "Service" --fqdn {{ hostname }} --description "Main DHCP server"
     tags:
       - dhcp
 
@@ -364,7 +364,7 @@
     tags:
       - penatesserver
   - name: register HTTP service
-    command: penatesserver-manage service https {{ penates_directory_fqdn }} 443 --role "Service" --fqdn {{ penates_directory_fqdn }} --description "Penates Webservices" --kerberos_service HTTP --keytab /etc/apache2/http.keytab --cert /etc/apache2/{{ penates_directory_fqdn }}.pem --key /etc/apache2/{{ penates_directory_fqdn }}.pem --ca /etc/apache2/{{ penates_directory_fqdn }}.pem
+    command: penatesserver-manage service https {{ penates_directory_fqdn }} 443 --role "Service" --fqdn {{ hostname }} --description "Penates Webservices" --kerberos_service HTTP --keytab /etc/apache2/http.keytab --cert /etc/apache2/{{ penates_directory_fqdn }}.pem --key /etc/apache2/{{ penates_directory_fqdn }}.pem --ca /etc/apache2/{{ penates_directory_fqdn }}.pem
     tags:
       - penatesserver
   - file: path=/var/penatesserver/data state=directory owner=penatesserver recurse=yes group=penatesserver
@@ -393,6 +393,12 @@
     tags:
       - penatesserver
   - service: name=apache2 state=restarted
+    tags:
+      - penatesserver
+  - command: systemctl enable penatesserver-gunicorn.service
+    tags:
+      - penatesserver
+  - service: name=penatesserver-gunicorn state=restarted
     tags:
       - penatesserver
 
@@ -425,6 +431,6 @@
     tags:
       - powerdns
   - name: register DNS service
-    command: penatesserver-manage service dns {{ penates_directory_fqdn }} 53 --role "Service" --fqdn {{ penates_directory_fqdn }} --description "Main DNS server"
+    command: penatesserver-manage service dns {{ penates_directory_fqdn }} 53 --role "Service" --fqdn {{ hostname }} --description "Main DNS server"
     tags:
       - powerdns
