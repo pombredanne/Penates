@@ -28,6 +28,8 @@ replace: olcDbIndex
 olcDbIndex: objectClass eq
 olcDbIndex: krbPrincipalName eq,pres,sub
 olcDbIndex: cn eq
+olcDbIndex: dhcpHWAddress eq
+olcDbIndex: dhcpClassData eq
 olcDbIndex: gidNumber eq,pres
 olcDbIndex: memberUid eq,pres,sub
 olcDbIndex: uid eq,pres,sub

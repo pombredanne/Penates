@@ -79,10 +79,7 @@ dhcpNetMask: {{ penates_subnet|subnet_mask_len }}
 dhcpRange: {{ penates_subnet|subnet_start }} {{ penates_subnet|subnet_end }}
 dhcpStatements: default-lease-time 600
 dhcpStatements: max-lease-time 7200
-dhcpOption: domain-name-servers {{ penates_auth_server_ip }}
-dhcpOption: domain-name "{{ penates_domain }}"
 dhcpOption: broadcast-address {{ penates_subnet|subnet_broadcast }}
-dhcpOption: nis-domain "{{ penates_domain }}"
-dhcpOption: netbios-name-servers {{ penates_auth_server_ip }}
 dhcpOption: subnet-mask {{ penates_subnet|subnet_mask }}
 dhcpOption: routers {{ penates_router }}
+
