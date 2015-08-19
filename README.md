@@ -12,7 +12,8 @@ Group of Ansible tasks for configuring a basic private network with the followin
   * webservices (PenatesServer)
   * pkinit for users
 
-Processes:
+Processes
+---------
 
   * a new machine is installed:
   
@@ -28,8 +29,19 @@ Processes:
     * get private key and certificate
     * get keytab
     
+  * a new user is created by admin:
+  
+    * create password
+    * create certificate (email, authent)
+    * create ssh public key
+    * create private key
     
-TODO:
+    
+TODO
+====
+
+Step 1
+------
 
   * NTP
   * DNSSEC
@@ -37,4 +49,58 @@ TODO:
   * user creation
   * group creation
   * A/AAAA external records
-  * mails
+  * mail
+  * pkinit
+  * certificates and ssh public keys in LDAP 
+  * revoke certificate
+  * set machine keytab/certificate/rsa ssh key
+
+Step 2
+------
+
+  * TFTP server + ISO mirror
+  * ubuntu mirror
+  * moneta mirror
+  * supervision
+  * logging
+  * kerberos authent on machines
+  * LDAP autz on machines (netgroups)
+
+Step 3
+------
+
+  * XML profiles for iOS / OS X
+  * XMPP
+  * IMAP/POP3
+  * proxy HTTP + kerberos
+
+Step 4
+------
+
+  * Plex
+  * IRC bouncer
+  * Seafile
+
+Step 5
+------
+
+  * Gitlab
+  * Maven
+  * Readthedocs
+  * Updoc
+  * Vagrant mirror
+  * SIP
+  * pypi mirror
+  
+Step 6
+------
+
+  * infrastucture secondaire (LDAP, Kerberos, DNS+Postgres, DHCP, NTP)
+  
+Step 7
+------
+
+  * VPN
+  * 802.1x
+  * backup
+  * restauration depuis le backup

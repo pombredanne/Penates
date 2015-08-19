@@ -59,9 +59,6 @@
   - pip: name=pygments
     tags:
       - penatesserver
-  - pip: name=django-powerdns-manager==0.2.1a1
-    tags:
-      - penatesserver
   - pip: name=django-ldapdb
     tags:
       - penatesserver
@@ -147,7 +144,7 @@
     tags:
       - penatesserver
   - name: create base domain
-    command: penatesserver-manage ensure_domain {{ penates_domain }} --subnet {{ penates_subnet|subnet_address }}
+    command: penatesserver-manage ensure_domain {{ penates_domain }}
     tags:
       - penatesserver
       - powerdns
@@ -181,7 +178,7 @@
     tags:
       - ldap
   - name: register LDAP service
-    command: penatesserver-manage service ldaps {{ penates_directory_fqdn }} 636 --fqdn {{ hostname }} --description "Main LDAP server" --cert /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.crt --key /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.key --subnet {{ penates_subnet|subnet_address }}
+    command: penatesserver-manage service ldaps {{ penates_directory_fqdn }} 636 --fqdn {{ hostname }} --description "Main LDAP server" --cert /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.crt --key /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.key
     tags:
       - ldap
   - name: copy OpenLDAP base content
@@ -238,6 +235,16 @@
       - ldap
   - name: restart OpenLDAP
     service: name=slapd state=restarted
+    tags:
+      - ldap
+  - name: create base domain
+    command: penatesserver-manage ensure_domain {{ penates_domain }} --subnet {{ penates_subnet|subnet_address }}
+    tags:
+      - penatesserver
+      - powerdns
+      - ldap
+  - name: register LDAP service
+    command: penatesserver-manage service ldaps {{ penates_directory_fqdn }} 636 --fqdn {{ hostname }} --description "Main LDAP server" --cert /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.crt --key /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.key --subnet {{ penates_subnet|subnet_address }}
     tags:
       - ldap
 
@@ -428,6 +435,10 @@
       - powerdns
   - name: open TCP port for PowerDNS
     ufw: rule=allow port=53 proto=udp
+    tags:
+      - powerdns
+  - name: apply DNSSEC to zones
+    shell: pdnssec secure-all-zones | true
     tags:
       - powerdns
   - name: register DNS service
