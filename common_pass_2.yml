@@ -1,0 +1,11 @@
+---
+- hosts: all_servers
+  remote_user: root
+  tasks:
+  - stat: path=/etc/krb5.keytab
+    register: check_host_keytab
+  - command: "curl -o /etc/krb5.keytab https://directory01.test.example.org/no-auth/get_host_keytab/{{ ansible_nodename }}"
+    when: check_host_keytab.stat.exists == False
+  - file: path=/etc/krb5.keytab owner=root mode=0600 group=root
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/ssl/private/host.pem --anyauth -u : https://directory01.test.example.org/auth/get_host_certificate/"
+  - file: path=/etc/ssl/private/host.pem owner=root mode=0600 group=root

@@ -90,6 +90,15 @@ def subnet_end(subnet):
     return str(network.network - 2 + 2 ** (size - network.prefixlen))
 
 
+def reverse_subnet(subnet):
+    """
+    >>> reverse_subnet('192.168.56.0/24')
+    u'56.168.192.in-addr.arpa'
+    """
+    network = netaddr.IPNetwork(subnet)
+    return network.network.reverse_dns[:-1].partition('.')[2]
+
+
 class FilterModule(object):
     # noinspection PyMethodMayBeStatic
     def filters(self):
@@ -102,4 +111,5 @@ class FilterModule(object):
                 'subnet_broadcast': subnet_broadcast,
                 'subnet_start': subnet_start,
                 'subnet_end': subnet_end,
+                'reverse_subnet': reverse_subnet,
                 }

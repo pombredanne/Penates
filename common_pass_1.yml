@@ -3,26 +3,22 @@
   remote_user: root
   tasks:
   - command: apt-get update
-  - name: install Kerberos
-    apt: pkg=krb5-user state=latest
-  - name: install curl
-    apt: pkg=curl state=latest
+  - apt: pkg=krb5-user state=latest
+  - apt: pkg=curl state=latest
+  - apt: pkg=kstart state=latest
   - name: copy Kerberos configuration
     template: src=templates/common/krb5.conf dest=/etc/krb5.conf
   - name: copy LDAP configuration
     template: src=templates/common/ldap.conf dest=/etc/ldap/ldap.conf
-  - name: install vim
-    apt: pkg=vim state=latest
+  - apt: pkg=vim state=latest
 
-  - name: install ufw
-    apt: pkg=ufw state=latest
+  - apt: pkg=ufw state=latest
   - ufw: rule=limit port=ssh proto=tcp
   - name: ufw configuration
     ufw: state=enabled policy=allow
   - name: hosts configuration
     template: src=templates/common/hosts dest=/etc/hosts
-  - name: CA root certificates
-    apt: pkg=ca-certificates state=latest
+  - apt: pkg=ca-certificates state=latest
   - name: CA root certificate (1/2)
     template: src=files/auth_servers/ca_cert.pem dest=/etc/ssl/certs/Penates_CA.pem mode=0644
   - name: CA root certificate (2/2)

@@ -268,6 +268,10 @@
     command: penatesserver-manage service krb {{ penates_directory_fqdn }} 88 --role "Kerberos DC" --fqdn {{ hostname }} --description "Main Kerberos server" --cert /etc/krb5kdc/{{ penates_directory_fqdn }}.crt --key /etc/krb5kdc/{{ penates_directory_fqdn }}.key --subnet {{ penates_subnet|subnet_address }}
     tags:
       - kerberos
+  - name: register Kerberos UDP service
+    command: penatesserver-manage service krb {{ penates_directory_fqdn }} 88 --role "Kerberos DC" --fqdn {{ hostname }} --description "Main Kerberos server" --protocol udp
+    tags:
+      - kerberos
   - name: copy Kerberos configuration
     template: src=templates/auth_servers/kdc.conf dest=/etc/krb5kdc/kdc.conf
     tags:
@@ -338,7 +342,7 @@
     tags:
       - dhcp
   - name: register DHCP service
-    command: penatesserver-manage service dhcp {{ penates_directory_fqdn }} 67 --role "Service" --fqdn {{ hostname }} --description "Main DHCP server" --subnet {{ penates_subnet|subnet_address }}
+    command: penatesserver-manage service dhcp {{ penates_directory_fqdn }} 67 --role "Service" --fqdn {{ hostname }} --description "Main DHCP server" --subnet {{ penates_subnet|subnet_address }} --protocol udp
     tags:
       - dhcp
 
@@ -442,6 +446,6 @@
     tags:
       - powerdns
   - name: register DNS service
-    command: penatesserver-manage service dns {{ penates_directory_fqdn }} 53 --role "Service" --fqdn {{ hostname }} --description "Main DNS server" --subnet {{ penates_subnet|subnet_address }}
+    command: penatesserver-manage service dns {{ penates_directory_fqdn }} 53 --role "Service" --fqdn {{ hostname }} --description "Main DNS server" --subnet {{ penates_subnet|subnet_address }} --protocol udp
     tags:
       - powerdns
