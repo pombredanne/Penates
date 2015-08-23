@@ -99,6 +99,14 @@ def reverse_subnet(subnet):
     return network.network.reverse_dns[:-1].partition('.')[2]
 
 
+def subnet_version(subnet):
+    """
+    >>> subnet_version('192.168.56.0/24')
+    4
+    """
+    return netaddr.IPNetwork(subnet).version
+
+
 class FilterModule(object):
     # noinspection PyMethodMayBeStatic
     def filters(self):
@@ -112,4 +120,5 @@ class FilterModule(object):
                 'subnet_start': subnet_start,
                 'subnet_end': subnet_end,
                 'reverse_subnet': reverse_subnet,
+                'subnet_version': subnet_version,
                 }

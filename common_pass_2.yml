@@ -4,8 +4,29 @@
   tasks:
   - stat: path=/etc/krb5.keytab
     register: check_host_keytab
-  - command: "curl -o /etc/krb5.keytab https://directory01.test.example.org/no-auth/get_host_keytab/{{ ansible_nodename }}"
+  - command: "curl -o /etc/krb5.keytab https://{{ penates_directory_fqdn }}/no-auth/get_host_keytab/{{ ansible_nodename }}"
     when: check_host_keytab.stat.exists == False
   - file: path=/etc/krb5.keytab owner=root mode=0600 group=root
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/ssl/private/host.pem --anyauth -u : https://directory01.test.example.org/auth/get_host_certificate/"
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/ssl/private/host.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_host_certificate/"
   - file: path=/etc/ssl/private/host.pem owner=root mode=0600 group=root
+  - command: "openssl x509 -in /etc/ssl/private/host.pem -out /etc/host.pem"
+  - command: "openssl rsa -in /etc/ssl/private/host.pem -out /etc/ssh/ssh_host_rsa_key"
+  - file: path=/etc/ssh/ssh_host_rsa_key owner=root mode=0600 group=root
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/ssh/ssh_host_rsa_key.pub --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_ssh_pub/"
+  - shell: "ifconfig | grep -B 2 `k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_info/ | grep REMOTE_ADDR | cut -f 2 -d ':'` | grep HWaddr | cut -d 'H' -f 2 | cut -d ' ' -f 2"
+    register: primary_mac_address
+    tags:
+      - dhcp
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_dhcp/{{ primary_mac_address.stdout }}/"
+    tags:
+      - dhcp
+
+- hosts: auth_servers
+  remote_user: root
+  tasks:
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : -o /etc/dhcp/dhcpd.conf https://{{ penates_directory_fqdn }}/auth/conf/dhcpd.conf"
+    tags:
+      - dhcp
+  - service: name=isc-dhcp-server state=restarted
+    tags:
+      - dhcp

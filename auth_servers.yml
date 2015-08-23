@@ -218,9 +218,6 @@
   - file: path=/etc/ldap/slapd.d/{{ penates_directory_fqdn }}.key state=file owner=openldap mode=0400 group=openldap
     tags:
       - ldap
-  - lineinfile: regexp='SLAPD_SERVICES="ldap:/// ldapi:///"' line='SLAPD_SERVICES="ldap:/// ldapi:/// ldaps:///"' dest=/etc/default/slapd
-    tags:
-      - ldap
   - name: restart OpenLDAP
     service: name=slapd state=restarted
     tags:
@@ -316,8 +313,7 @@
     template: src=templates/auth_servers/dhcpd.conf dest=/etc/dhcp/dhcpd.conf
     tags:
       - dhcp
-  - name: restart isc-dhcpd
-    service: name=isc-dhcp-server state=restarted
+  - service: name=isc-dhcp-server state=restarted
     tags:
       - dhcp
   - name: restart isc-dhcpd6
@@ -436,3 +432,15 @@
     command: penatesserver-manage service dns {{ penates_directory_fqdn }} 53 --role "Service" --fqdn {{ penates_directory_hostname }} --description "Main DNS server" --protocol udp
     tags:
       - powerdns
+  - template: src=templates/auth_servers/main_network_interface.cfg dest=/etc/network/interfaces.d/{{ primary_network_interface }}.cfg owner=root group=root mode=0644
+    tags:
+      - networking
+  - lineinfile: regexp='iface\s+{{ primary_network_interface }}\s+inet\s+dhcp\s*' state=absent dest=/etc/network/interfaces
+    tags:
+      - networking
+  - lineinfile: regexp='auto\s+{{ primary_network_interface }}\s*' state=absent dest=/etc/network/interfaces
+    tags:
+      - networking
+  - service: name=networking state=restarted
+    tags:
+      - networking

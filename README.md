@@ -43,6 +43,8 @@ TODO
 Step 1
 ------
 
+  * [OK] IP fixe
+  * [OK] set machine keytab/certificate/rsa ssh key
   * NTP
   * DNSSEC
   * DNS / DANE
@@ -53,7 +55,6 @@ Step 1
   * pkinit
   * certificates and ssh public keys in LDAP 
   * revoke certificate
-  * set machine keytab/certificate/rsa ssh key
 
 Step 2
 ------
