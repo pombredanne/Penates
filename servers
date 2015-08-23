@@ -9,10 +9,10 @@ ldap_root_password=toto
 kerberos_master_password=toto
 penatesserver_password=toto
 powerdns_password=toto
-hostname=openldap.test.example.org
 
 [all_servers:vars]
 penates_directory_fqdn=directory01.{{ penates_domain }}
+penates_directory_hostname=firstcomp.test.example.org
 penates_domain=test.example.org
 penates_auth_server_ip=192.168.56.101
 penates_router=192.168.56.1
