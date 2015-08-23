@@ -157,18 +157,10 @@
     apt: pkg=ldap-utils state=latest
     tags:
       - ldap
-  - name: ensure isc-dhcp-server-ldap is at the latest version
-    apt: pkg=isc-dhcp-server-ldap state=latest
-    tags:
-      - ldap
   - name: copy kerberos.ldif
     copy: src=files/auth_servers/kerberos.ldif dest=/etc/ldap/schema/kerberos.ldif
     tags:
       - kerberos
-  - name: copy dhcp.ldif
-    copy: src=files/auth_servers/dhcp.ldif dest=/etc/ldap/schema/dhcp.ldif
-    tags:
-      - ldap
   - name: copy samba.ldif
     copy: src=files/auth_servers/samba.ldif dest=/etc/ldap/schema/samba.ldif
     tags:
@@ -203,10 +195,6 @@
       - ldap
   - name: import samba.ldif
     shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/samba.ldif | true
-    tags:
-      - ldap
-  - name: import dhcp.ldif
-    shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/dhcp.ldif | true
     tags:
       - ldap
   - name: import base data
@@ -321,8 +309,7 @@
       - penatesserver
       - kerberos
 
-  - name: ensure isc-dhcp-server is at the latest version
-    apt: pkg=isc-dhcp-server state=latest
+  - apt: pkg=isc-dhcp-server state=latest
     tags:
       - dhcp
   - name: copy isc-dhcpd configuration

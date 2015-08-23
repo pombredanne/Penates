@@ -48,38 +48,3 @@ gidNumber: 10002
 dn: ou=Services,{{ penates_domain|hostname_to_dn}}
 objectClass: organizationalUnit
 ou: Services
-
-dn: ou=dhcp,ou=Services,{{ penates_domain|hostname_to_dn}}
-objectClass: top
-objectClass: organizationalUnit
-ou: dhcp
-description: DHCP Servers
-
-dn: cn=dhcp01,ou=dhcp,ou=Services,{{ penates_domain|hostname_to_dn}}
-cn: dhcp01
-objectClass: top
-objectClass: dhcpServer
-dhcpServiceDN: cn=config,ou=dhcp,ou=Services,{{ penates_domain|hostname_to_dn}}
-
-dn: cn=config,ou=dhcp,ou=Services,{{ penates_domain|hostname_to_dn}}
-cn: config
-objectClass: top
-objectClass: dhcpService
-dhcpPrimaryDN:  cn=dhcp01,ou=dhcp,ou=Services,{{ penates_domain|hostname_to_dn}}
-dhcpStatements: ddns-update-style none
-dhcpStatements: get-lease-hostnames true
-dhcpStatements: use-host-decl-names true
-
-dn: cn={{ penates_subnet|subnet_address }},cn=config,ou=dhcp,ou=Services,{{ penates_domain|hostname_to_dn}}
-cn: {{ penates_subnet|subnet_address }}
-objectClass: top
-objectClass: dhcpSubnet
-objectClass: dhcpOptions
-dhcpNetMask: {{ penates_subnet|subnet_mask_len }}
-dhcpRange: {{ penates_subnet|subnet_start }} {{ penates_subnet|subnet_end }}
-dhcpStatements: default-lease-time 600
-dhcpStatements: max-lease-time 7200
-dhcpOption: broadcast-address {{ penates_subnet|subnet_broadcast }}
-dhcpOption: subnet-mask {{ penates_subnet|subnet_mask }}
-dhcpOption: routers {{ penates_router }}
-
