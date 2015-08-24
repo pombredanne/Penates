@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import re
 import netaddr
+import unicodedata
 
 __author__ = 'Matthieu Gallet'
 
@@ -107,6 +109,12 @@ def subnet_version(subnet):
     return netaddr.IPNetwork(subnet).version
 
 
+def slugify(value):
+    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    value = re.sub('[^\w\s-]', '', value).strip().lower()
+    return re.sub('[-\s]+', '-', value)
+
+
 class FilterModule(object):
     # noinspection PyMethodMayBeStatic
     def filters(self):
@@ -121,4 +129,5 @@ class FilterModule(object):
                 'subnet_end': subnet_end,
                 'reverse_subnet': reverse_subnet,
                 'subnet_version': subnet_version,
+                'slugify': slugify,
                 }

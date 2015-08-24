@@ -14,6 +14,12 @@ cn: admin
 description: LDAP administrator
 userPassword: secret
 
+dn: sambaDomainName={{ penates_organization|slugify }},{{ penates_domain|hostname_to_dn}}
+sambaDomainName: {{ penates_organization|slugify }}
+sambaSID: {{ samba_sid }}
+sambaAlgorithmicRidBase: 1000
+objectClass: sambaDomain
+
 dn: ou=Users,{{ penates_domain|hostname_to_dn}}
 objectClass: organizationalUnit
 ou: Users
@@ -32,16 +38,25 @@ ou: Computers
 
 dn: cn={{ penates_administrators_group }},ou=Groups,{{ penates_domain|hostname_to_dn}}
 objectClass: posixGroup
+objectClass: sambaGroupMapping
+sambaGroupType: 2
+sambaSID: {{ samba_sid }}-10000
 cn: {{ penates_administrators_group }}
 gidNumber: 10000
 
 dn: cn={{ penates_users_group }},ou=Groups,{{ penates_domain|hostname_to_dn}}
 objectClass: posixGroup
+objectClass: sambaGroupMapping
+sambaGroupType: 2
+sambaSID: {{ samba_sid }}-10001
 cn: {{ penates_users_group }}
 gidNumber: 10001
 
 dn: cn={{ penates_guests_group }},ou=Groups,{{ penates_domain|hostname_to_dn}}
 objectClass: posixGroup
+objectClass: sambaGroupMapping
+sambaGroupType: 2
+sambaSID: {{ samba_sid }}-10002
 cn: {{ penates_guests_group }}
 gidNumber: 10002
 
