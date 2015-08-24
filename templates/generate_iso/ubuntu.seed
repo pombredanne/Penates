@@ -30,7 +30,7 @@ d-i netcfg/get_hostname string Computer
 d-i netcfg/get_domain string {{ penates_domain }}
 d-i clock-setup/utc boolean true
 d-i time/zone string {{ penates_timezone }}
-d-i preseed/late_command string  in-target mkdir -p /root/.ssh ; in-target echo "{{ root_ssh_pub_key }}" > /root/.ssh/id_rsa.pub
+d-i preseed/late_command string  in-target mkdir -p /root/.ssh ; in-target echo "{{ root_ssh_pub_key }}" > /root/.ssh/authorized_keys
 d-i pkgsel/install-language-support boolean false
 tasksel tasksel/first multiselect standard, ubuntu-server
 d-i pkgsel/upgrade select none
