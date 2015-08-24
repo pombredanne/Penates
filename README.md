@@ -18,16 +18,25 @@ Processes
   * a new machine is installed:
   
     * register itself (create Kerberos principal, private key, public SSH key, certificate, PTR DNS record, A/AAAA DNS record, SSHFP DNS record) and get a host keytab
+        GET https://directory01.{{ domain }}/no-auth/get_host_keytab/<hostname>
     * get private key and certificate
-    * get SSH keys
+        GET https://directory01.{{ domain }}/auth/get_host_certificate/
+    * register SSH keys
+        POST https://directory01.{{ domain }}/auth/set_ssh_pub/
     * register its MAC address with its (primary) IP address
+        GET https://directory01.{{ domain }}/auth/set_dhcp/<mac_address>/
 
   * a new service is installed:
    
-    * register itself (protocol://hostname:port/) with a description
-    * register CNAME and SRV DNS records, DHCP records
+    * register itself (protocol://hostname:port/) with a description, register CNAME and SRV DNS records
+        GET https://directory01.{{ domain }}/auth/set_service/<scheme>/<hostname>/<port>/?keytab=<HTTP>&protocol=udp
     * get private key and certificate
+        GET https://directory01.{{ domain }}/auth/get_service_certificate/<scheme>/<hostname>/<port>/?protocol=udp
     * get keytab
+        GET https://directory01.{{ domain }}/auth/get_service_keytab/<scheme>/<hostname>/<port>/?protocol=udp
+    
+  * register a foreign domain name:
+        GET https://directory01.{{ domain }}/auth/set_extra_service/<hostname><?ip=<ip>
     
   * a new user is created by admin:
   
@@ -46,14 +55,13 @@ Step 1
   * [OK] IP fixe
   * [OK] set machine keytab/certificate/rsa ssh key
   * [OK] NTP
+  * [OK] A/AAAA external records
   * DNSSEC
   * DNS / DANE
-  * user creation
-  * group creation
-  * A/AAAA external records
+  * [OK] user creation
+  * [OK] group creation
   * mail
   * pkinit
-  * certificates and ssh public keys in LDAP 
   * revoke certificate
 
 Step 2
