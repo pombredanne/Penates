@@ -12,17 +12,17 @@
     command: hostname {{ penates_directory_hostname.partition('.')[0] }}
     tags:
       - powerdns
-  - apt: pkg=postgresql-9.4 state=latest
+  - apt: pkg=postgresql-9.4
     tags:
       - powerdns
       - penatesserver
-  - apt: pkg=python-pip state=latest
+  - apt: pkg=python-pip
     tags:
       - penatesserver
-  - apt: pkg=python-dev state=latest
+  - apt: pkg=python-dev
     tags:
       - penatesserver
-  - apt: pkg=libldap2-dev state=latest
+  - apt: pkg=libldap2-dev
     tags:
       - penatesserver
   - apt: pkg=libsasl2-dev
@@ -150,11 +150,11 @@
       - powerdns
 
   - name: ensure OpenLDAP is at the latest version
-    apt: pkg=slapd state=latest
+    apt: pkg=slapd
     tags:
       - ldap
   - name: ensure LDAP-Utils is at the latest version
-    apt: pkg=ldap-utils state=latest
+    apt: pkg=ldap-utils
     tags:
       - ldap
   - name: copy kerberos.ldif
@@ -234,15 +234,15 @@
       - ldap
 
   - name: ensure krb5-kdc-ldap is at the latest version
-    apt: pkg=krb5-kdc-ldap state=latest
+    apt: pkg=krb5-kdc-ldap
     tags:
       - kerberos
   - name: ensure krb5-kdc is at the latest version
-    apt: pkg=krb5-kdc state=latest
+    apt: pkg=krb5-kdc
     tags:
       - kerberos
   - name: ensure krb5-admin-server is at the latest version
-    apt: pkg=krb5-admin-server state=latest
+    apt: pkg=krb5-admin-server
     tags:
       - kerberos
   - name: copy Kerberos LDAP password
@@ -306,7 +306,7 @@
       - penatesserver
       - kerberos
 
-  - apt: pkg=isc-dhcp-server state=latest
+  - apt: pkg=isc-dhcp-server
     tags:
       - dhcp
   - name: copy isc-dhcpd configuration
@@ -396,16 +396,16 @@
     tags:
       - penatesserver
 
-  - apt: pkg=pdns-backend-pgsql state=latest
+  - apt: pkg=pdns-backend-pgsql
     tags:
       - powerdns
-  - apt: pkg=dnsutils state=latest
+  - apt: pkg=dnsutils
     tags:
       - powerdns
-  - apt: pkg=pdns-server state=latest
+  - apt: pkg=pdns-server
     tags:
       - powerdns
-  - apt: pkg=pdns-recursor state=latest
+  - apt: pkg=pdns-recursor
     tags:
       - powerdns
   - template: src=templates/auth_servers/pdns.conf dest=/etc/powerdns/pdns.conf owner=pdns group=pdns mode=0644

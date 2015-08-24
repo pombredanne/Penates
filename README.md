@@ -45,7 +45,7 @@ Step 1
 
   * [OK] IP fixe
   * [OK] set machine keytab/certificate/rsa ssh key
-  * NTP
+  * [OK] NTP
   * DNSSEC
   * DNS / DANE
   * user creation
