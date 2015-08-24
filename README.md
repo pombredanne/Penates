@@ -19,8 +19,8 @@ Processes
   
     * register itself (create Kerberos principal, private key, public SSH key, certificate, PTR DNS record, A/AAAA DNS record, SSHFP DNS record) and get a host keytab
     * get private key and certificate
-    * get SSH key
-    * register its MAC addresses to its IP addresses
+    * get SSH keys
+    * register its MAC address with its (primary) IP address
 
   * a new service is installed:
    

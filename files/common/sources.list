@@ -1,0 +1,23 @@
+deb http://fr.archive.ubuntu.com/ubuntu/ vivid main restricted
+deb-src http://fr.archive.ubuntu.com/ubuntu/ vivid main restricted
+deb http://fr.archive.ubuntu.com/ubuntu/ vivid-updates main restricted
+deb-src http://fr.archive.ubuntu.com/ubuntu/ vivid-updates main restricted
+deb http://security.ubuntu.com/ubuntu vivid-security main restricted
+deb-src http://security.ubuntu.com/ubuntu vivid-security main restricted
+
+deb http://fr.archive.ubuntu.com/ubuntu/ vivid universe
+deb-src http://fr.archive.ubuntu.com/ubuntu/ vivid universe
+deb http://fr.archive.ubuntu.com/ubuntu/ vivid-updates universe
+deb-src http://fr.archive.ubuntu.com/ubuntu/ vivid-updates universe
+deb http://security.ubuntu.com/ubuntu vivid-security universe
+deb-src http://security.ubuntu.com/ubuntu vivid-security universe
+
+deb http://fr.archive.ubuntu.com/ubuntu/ vivid multiverse
+deb-src http://fr.archive.ubuntu.com/ubuntu/ vivid multiverse
+deb http://fr.archive.ubuntu.com/ubuntu/ vivid-updates multiverse
+deb-src http://fr.archive.ubuntu.com/ubuntu/ vivid-updates multiverse
+deb http://security.ubuntu.com/ubuntu vivid-security multiverse
+deb-src http://security.ubuntu.com/ubuntu vivid-security multiverse
+
+deb http://fr.archive.ubuntu.com/ubuntu/ vivid-backports main restricted universe multiverse
+deb-src http://fr.archive.ubuntu.com/ubuntu/ vivid-backports main restricted universe multiverse

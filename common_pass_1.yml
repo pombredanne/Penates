@@ -2,6 +2,7 @@
 - hosts: all_servers
   remote_user: root
   tasks:
+  - copy: src=files/common/sources.list dest=/etc/apt/sources.list owner=root mode=0644 group=root
   - command: apt-get update
   - apt: pkg=krb5-user state=latest
   - apt: pkg=curl state=latest
