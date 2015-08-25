@@ -56,15 +56,16 @@ Step 1
   * [OK] set machine keytab/certificate/rsa ssh key
   * [OK] NTP
   * [OK] A/AAAA external records
-  * DNSSEC
-  * DNS / DANE
   * [OK] user creation
   * [OK] group creation
-  * set user password
-  * mail
-  * pkinit
-  * revoke certificate
+  * [OK] set user password
+  * [OK] get self certificate
+  * [OK] pkinit
   * tests pour chaque étape
+  * DNSSEC
+  * DNS / DANE
+  * mail
+  * revoke certificate
 
 Step 2
 ------

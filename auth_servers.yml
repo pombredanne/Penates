@@ -225,6 +225,12 @@
     service: name=slapd state=restarted
     tags:
       - ldap
+  - command: ldapsearch -x -H ldaps://{{ penates_directory_fqdn }}/
+    name: test ldaps:// interface
+  - command: ldapsearch -x -H ldap://{{ penates_directory_fqdn }}/
+    name: test ldap:// interface
+  - command: ldapsearch -x -H ldapi:///
+    name: test ldapi:// interface
   - name: create base domain
     command: penatesserver-manage ensure_domain {{ penates_domain }}
     tags:
@@ -253,11 +259,11 @@
     tags:
       - kerberos
   - name: register Kerberos service
-    command: penatesserver-manage service krb {{ penates_directory_fqdn }} 88 --role "Kerberos DC" --fqdn {{ penates_directory_hostname }} --description "Main Kerberos server" --cert /etc/krb5kdc/{{ penates_directory_fqdn }}.crt --key /etc/krb5kdc/{{ penates_directory_fqdn }}.key
+    command: penatesserver-manage service krb {{ penates_directory_fqdn }} 88 --role "Kerberos DC" --fqdn {{ penates_directory_hostname }} --description "Main Kerberos server" --cert /etc/krb5kdc/{{ penates_directory_fqdn }}.crt --key /etc/krb5kdc/{{ penates_directory_fqdn }}.key --srv tcp/kerberos
     tags:
       - kerberos
   - name: register Kerberos UDP service
-    command: penatesserver-manage service krb {{ penates_directory_fqdn }} 88 --role "Kerberos DC" --fqdn {{ penates_directory_hostname }} --description "Main Kerberos server" --protocol udp
+    command: penatesserver-manage service krb {{ penates_directory_fqdn }} 88 --role "Kerberos DC" --fqdn {{ penates_directory_hostname }} --description "Main Kerberos server" --protocol udp --srv tcp/kerberos
     tags:
       - kerberos
   - name: copy Kerberos configuration
@@ -309,11 +315,23 @@
       - penatesserver
       - kerberos
 
+  - apt: pkg=dhcping
+    tags:
+      - dhcp
   - apt: pkg=isc-dhcp-server
     tags:
       - dhcp
   - name: copy isc-dhcpd configuration
     template: src=templates/auth_servers/dhcpd.conf dest=/etc/dhcp/dhcpd.conf
+    tags:
+      - dhcp
+#  - lineinfile: regexp="    exec dhcpd -user dhcpd -group dhcpd -f -4 -pf /run/dhcp-server/dhcpd.pid -cf $CONFIG_FILE $INTERFACES" dest=/etc/systemd/system/multi-user.target.wants/isc-dhcp-server.service line="    exec dhcpd -user dhcpd -group dhcpd -f -4 -pf /var/run/dhcp-server/dhcpd.pid -cf $CONFIG_FILE $INTERFACES"
+#    tags:
+#      - dhcp
+#  - lineinfile: regexp="    exec dhcpd -user dhcpd -group dhcpd -f -6 -pf /run/dhcp-server/dhcpd6.pid -cf $CONFIG_FILE $INTERFACES" dest=/etc/systemd/system/multi-user.target.wants/isc-dhcp-server6.service line="    exec dhcpd -user dhcpd -group dhcpd -f -4 -pf /var/run/dhcp-server/dhcpd6.pid -cf $CONFIG_FILE $INTERFACES"
+#    tags:
+#      - dhcp
+  - command: systemctl daemon-reload
     tags:
       - dhcp
   - service: name=isc-dhcp-server state=restarted
@@ -438,6 +456,7 @@
   - template: src=templates/auth_servers/main_network_interface.cfg dest=/etc/network/interfaces.d/{{ primary_network_interface }}.cfg owner=root group=root mode=0644
     tags:
       - networking
+
   - lineinfile: regexp='iface\s+{{ primary_network_interface }}\s+inet\s+dhcp\s*' state=absent dest=/etc/network/interfaces
     tags:
       - networking
