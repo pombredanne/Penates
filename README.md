@@ -60,20 +60,22 @@ Step 1
   * DNS / DANE
   * [OK] user creation
   * [OK] group creation
+  * set user password
   * mail
   * pkinit
   * revoke certificate
+  * tests pour chaque étape
 
 Step 2
 ------
 
+  * kerberos authent on machines
+  * LDAP autz on machines (netgroups)
   * TFTP server + ISO mirror
   * ubuntu mirror
   * moneta mirror
   * supervision
   * logging
-  * kerberos authent on machines
-  * LDAP autz on machines (netgroups)
 
 Step 3
 ------

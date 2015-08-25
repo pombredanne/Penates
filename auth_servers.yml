@@ -215,6 +215,9 @@
   - file: path=/etc/ldap/base.ldif state=absent
     tags:
       - ldap
+  - lineinfile: dest=/etc/default/slapd regexp='SLAPD_SERVICES="ldap:/// ldapi:///"' line='SLAPD_SERVICES="ldap:/// ldapi:/// ldaps:///"'
+    tags:
+      - ldap
   - file: path=/etc/ldap/slapd.d/{{ penates_directory_fqdn }}.key state=file owner=openldap mode=0400 group=openldap
     tags:
       - ldap
