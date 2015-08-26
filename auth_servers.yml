@@ -275,16 +275,15 @@
     service: name=heimdal-kdc state=restarted
     tags:
       - kerberos
+  - service: name=openbsd-inetd state=restarted
+    tags:
+      - kerberos
   - name: open TCP port for Kerberos
     ufw: rule=allow port=88 proto=tcp
     tags:
       - kerberos
   - name: open UDP port for Kerberos
     ufw: rule=allow port=88 proto=udp
-    tags:
-      - kerberos
-  - name: open TCP port for Kerberos admin
-    ufw: rule=allow port=749 proto=tcp
     tags:
       - kerberos
   - shell: kadmin -l add --random-password --max-ticket-life=1d --max-renewable-life=1w --expiration-time=never --attributes= --pw-expiration-time=never --policy=default penatesserver/admin | true
@@ -299,42 +298,42 @@
     tags:
       - penatesserver
       - kerberos
-#
-#  - apt: pkg=dhcping
+
+  - apt: pkg=dhcping
+    tags:
+      - dhcp
+  - apt: pkg=isc-dhcp-server
+    tags:
+      - dhcp
+  - name: copy isc-dhcpd configuration
+    template: src=templates/auth_servers/dhcpd.conf dest=/etc/dhcp/dhcpd.conf
+    tags:
+      - dhcp
+#  - lineinfile: regexp="    exec dhcpd -user dhcpd -group dhcpd -f -4 -pf /run/dhcp-server/dhcpd.pid -cf $CONFIG_FILE $INTERFACES" dest=/etc/systemd/system/multi-user.target.wants/isc-dhcp-server.service line="    exec dhcpd -user dhcpd -group dhcpd -f -4 -pf /var/run/dhcp-server/dhcpd.pid -cf $CONFIG_FILE $INTERFACES"
 #    tags:
 #      - dhcp
-#  - apt: pkg=isc-dhcp-server
+#  - lineinfile: regexp="    exec dhcpd -user dhcpd -group dhcpd -f -6 -pf /run/dhcp-server/dhcpd6.pid -cf $CONFIG_FILE $INTERFACES" dest=/etc/systemd/system/multi-user.target.wants/isc-dhcp-server6.service line="    exec dhcpd -user dhcpd -group dhcpd -f -4 -pf /var/run/dhcp-server/dhcpd6.pid -cf $CONFIG_FILE $INTERFACES"
 #    tags:
 #      - dhcp
-#  - name: copy isc-dhcpd configuration
-#    template: src=templates/auth_servers/dhcpd.conf dest=/etc/dhcp/dhcpd.conf
-#    tags:
-#      - dhcp
-##  - lineinfile: regexp="    exec dhcpd -user dhcpd -group dhcpd -f -4 -pf /run/dhcp-server/dhcpd.pid -cf $CONFIG_FILE $INTERFACES" dest=/etc/systemd/system/multi-user.target.wants/isc-dhcp-server.service line="    exec dhcpd -user dhcpd -group dhcpd -f -4 -pf /var/run/dhcp-server/dhcpd.pid -cf $CONFIG_FILE $INTERFACES"
-##    tags:
-##      - dhcp
-##  - lineinfile: regexp="    exec dhcpd -user dhcpd -group dhcpd -f -6 -pf /run/dhcp-server/dhcpd6.pid -cf $CONFIG_FILE $INTERFACES" dest=/etc/systemd/system/multi-user.target.wants/isc-dhcp-server6.service line="    exec dhcpd -user dhcpd -group dhcpd -f -4 -pf /var/run/dhcp-server/dhcpd6.pid -cf $CONFIG_FILE $INTERFACES"
-##    tags:
-##      - dhcp
-#  - command: systemctl daemon-reload
-#    tags:
-#      - dhcp
-#  - service: name=isc-dhcp-server state=restarted
-#    tags:
-#      - dhcp
-#  - name: restart isc-dhcpd6
-#    service: name=isc-dhcp-server6 state=restarted
-#    tags:
-#      - dhcp
-#  - name: open UDP port for DHCP
-#    ufw: rule=allow port=67 proto=udp
-#    tags:
-#      - dhcp
-#  - name: register DHCP service
-#    command: penatesserver-manage service dhcp {{ penates_directory_fqdn }} 67 --role "Service" --fqdn {{ penates_directory_hostname }} --description "Main DHCP server"  --protocol udp
-#    tags:
-#      - dhcp
-#
+  - command: systemctl daemon-reload
+    tags:
+      - dhcp
+  - service: name=isc-dhcp-server state=restarted
+    tags:
+      - dhcp
+  - name: restart isc-dhcpd6
+    service: name=isc-dhcp-server6 state=restarted
+    tags:
+      - dhcp
+  - name: open UDP port for DHCP
+    ufw: rule=allow port=67 proto=udp
+    tags:
+      - dhcp
+  - name: register DHCP service
+    command: penatesserver-manage service dhcp {{ penates_directory_fqdn }} 67 --role "Service" --fqdn {{ penates_directory_hostname }} --description "Main DHCP server"  --protocol udp
+    tags:
+      - dhcp
+
 #  - apt: pkg=apache2
 #    tags:
 #      - penatesserver
