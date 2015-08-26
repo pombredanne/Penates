@@ -4,15 +4,14 @@
   tasks:
   - copy: src=files/common/sources.list dest=/etc/apt/sources.list owner=root mode=0644 group=root
   - command: apt-get update
-  - apt: pkg=krb5-user state=latest
-  - apt: pkg=curl state=latest
+  - apt: pkg=heimdal-clients state=latest
   - apt: pkg=kstart state=latest
+  - apt: pkg=curl state=latest
   - name: copy Kerberos configuration
     template: src=templates/common/krb5.conf dest=/etc/krb5.conf
   - name: copy LDAP configuration
     template: src=templates/common/ldap.conf dest=/etc/ldap/ldap.conf
   - apt: pkg=vim state=latest
-
   - apt: pkg=ufw state=latest
   - ufw: rule=limit port=ssh proto=tcp
   - name: ufw configuration

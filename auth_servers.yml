@@ -242,20 +242,10 @@
     tags:
       - ldap
 
-  - name: ensure krb5-kdc-ldap is at the latest version
-    apt: pkg=krb5-kdc-ldap
+  - apt: pkg=heimdal-kdc
     tags:
       - kerberos
-  - name: ensure krb5-kdc is at the latest version
-    apt: pkg=krb5-kdc
-    tags:
-      - kerberos
-  - name: ensure krb5-admin-server is at the latest version
-    apt: pkg=krb5-admin-server
-    tags:
-      - kerberos
-  - name: copy Kerberos LDAP password
-    template: src=templates/auth_servers/service.keyfile dest=/etc/krb5kdc/service.keyfile
+  - apt: pkg=heimdal-kcm
     tags:
       - kerberos
   - name: register Kerberos service
@@ -266,24 +256,23 @@
     command: penatesserver-manage service krb {{ penates_directory_fqdn }} 88 --role "Kerberos DC" --fqdn {{ penates_directory_hostname }} --description "Main Kerberos server" --protocol udp --srv tcp/kerberos
     tags:
       - kerberos
-  - name: copy Kerberos configuration
-    template: src=templates/auth_servers/kdc.conf dest=/etc/krb5kdc/kdc.conf
+  - name: copy Kerberos KDC configuration
+    template: src=templates/auth_servers/kdc.conf dest=/var/lib/heimdal-kdc/kdc.conf
     tags:
       - kerberos
   - name: copy Kerberos admin
-    template: src=templates/auth_servers/kadm5.acl dest=/etc/krb5kdc/kadm5.acl
+    template: src=templates/auth_servers/kadmind.acl dest=/etc/heimdal-kdc/kadmind.acl
     tags:
       - kerberos
-  - name: configure LDAP for Kerberos
-    shell: kdb5_ldap_util -D cn=admin,{{ penates_domain|hostname_to_dn }} -w {{ ldap_root_password }} -H ldapi:/// create -subtrees cn=krbContainer,{{ penates_domain|hostname_to_dn }} -r {{ penates_domain|upper }} -P {{ kerberos_master_password }} -s | true
+  - shell: kadmin -l init --realm-max-ticket-life=1d --realm-max-renewable-life=1w {{ penates_domain|upper }} | true
     tags:
       - kerberos
   - name: restart Kerberos admin
-    service: name=krb5-admin-server state=restarted
+    service: name=heimdal-kcm state=restarted
     tags:
       - kerberos
   - name: restart Kerberos
-    service: name=krb5-kdc state=restarted
+    service: name=heimdal-kdc state=restarted
     tags:
       - kerberos
   - name: open TCP port for Kerberos
@@ -298,176 +287,172 @@
     ufw: rule=allow port=749 proto=tcp
     tags:
       - kerberos
-  - name: create Kerberos admin principal for PenatesServer
-    command: penatesserver-manage keytab penatesserver/admin
-    tags:
-      - penatesserver
-      - kerberos
+  - shell: kadmin -l add --random-password --max-ticket-life=1d --max-renewable-life=1w --expiration-time=never --attributes= --pw-expiration-time=never --policy=default penatesserver/admin | true
+
   - name: remove keytab for PenatesServer
     file: path=/var/penatesserver/data/pki/private/kadmin.keytab state=absent
     tags:
       - penatesserver
       - kerberos
-
   - name: export to keytab for PenatesServer
-    command: kadmin.local -q "ktadd -k /var/penatesserver/data/pki/private/kadmin.keytab penatesserver/admin"
+    command: kadmin -l ext_keytab -k /var/penatesserver/data/pki/private/kadmin.keytab penatesserver/admin
     tags:
       - penatesserver
       - kerberos
-
-  - apt: pkg=dhcping
-    tags:
-      - dhcp
-  - apt: pkg=isc-dhcp-server
-    tags:
-      - dhcp
-  - name: copy isc-dhcpd configuration
-    template: src=templates/auth_servers/dhcpd.conf dest=/etc/dhcp/dhcpd.conf
-    tags:
-      - dhcp
-#  - lineinfile: regexp="    exec dhcpd -user dhcpd -group dhcpd -f -4 -pf /run/dhcp-server/dhcpd.pid -cf $CONFIG_FILE $INTERFACES" dest=/etc/systemd/system/multi-user.target.wants/isc-dhcp-server.service line="    exec dhcpd -user dhcpd -group dhcpd -f -4 -pf /var/run/dhcp-server/dhcpd.pid -cf $CONFIG_FILE $INTERFACES"
+#
+#  - apt: pkg=dhcping
 #    tags:
 #      - dhcp
-#  - lineinfile: regexp="    exec dhcpd -user dhcpd -group dhcpd -f -6 -pf /run/dhcp-server/dhcpd6.pid -cf $CONFIG_FILE $INTERFACES" dest=/etc/systemd/system/multi-user.target.wants/isc-dhcp-server6.service line="    exec dhcpd -user dhcpd -group dhcpd -f -4 -pf /var/run/dhcp-server/dhcpd6.pid -cf $CONFIG_FILE $INTERFACES"
+#  - apt: pkg=isc-dhcp-server
 #    tags:
 #      - dhcp
-  - command: systemctl daemon-reload
-    tags:
-      - dhcp
-  - service: name=isc-dhcp-server state=restarted
-    tags:
-      - dhcp
-  - name: restart isc-dhcpd6
-    service: name=isc-dhcp-server6 state=restarted
-    tags:
-      - dhcp
-  - name: open UDP port for DHCP
-    ufw: rule=allow port=67 proto=udp
-    tags:
-      - dhcp
-  - name: register DHCP service
-    command: penatesserver-manage service dhcp {{ penates_directory_fqdn }} 67 --role "Service" --fqdn {{ penates_directory_hostname }} --description "Main DHCP server"  --protocol udp
-    tags:
-      - dhcp
-
-  - apt: pkg=apache2
-    tags:
-      - penatesserver
-  - apt: pkg=libapache2-mod-xsendfile
-    tags:
-      - penatesserver
-  - apt: pkg=libapache2-mod-auth-kerb
-    tags:
-      - penatesserver
-  - apache2_module: state=present name=auth_kerb
-    tags:
-      - penatesserver
-  - apache2_module: state=present name=headers
-    tags:
-      - penatesserver
-  - apache2_module: state=present name=proxy
-    tags:
-      - penatesserver
-  - apache2_module: state=present name=proxy_http
-    tags:
-      - penatesserver
-  - apache2_module: state=present name=ssl
-    tags:
-      - penatesserver
-  - command: penatesserver-manage collectstatic --noinput
-    sudo_user: penatesserver
-    tags:
-      - penatesserver
-  - name: register HTTP service
-    command: penatesserver-manage service https {{ penates_directory_fqdn }} 443 --role "Service" --fqdn {{ penates_directory_hostname }} --description "Penates Webservices" --kerberos_service HTTP --keytab /etc/apache2/http.keytab --cert /etc/apache2/{{ penates_directory_fqdn }}.pem --key /etc/apache2/{{ penates_directory_fqdn }}.pem --ca /etc/apache2/{{ penates_directory_fqdn }}.pem
-    tags:
-      - penatesserver
-  - file: path=/var/penatesserver/data state=directory owner=penatesserver recurse=yes group=penatesserver
-    tags:
-      - penatesserver
-  - file: path=/etc/apache2/http.keytab state=file owner=www-data group=www-data mode=0600
-    tags:
-      - penatesserver
-  - file: path=/etc/apache2/{{ penates_directory_fqdn }}.pem state=file owner=www-data group=www-data mode=0600
-    tags:
-      - penatesserver
-  - template: src=templates/auth_servers/penatesserver.conf dest=/etc/apache2/sites-available/{{ penates_directory_fqdn }}.conf owner=www-data group=www-data mode=0644
-    tags:
-      - penatesserver
-  - file: path=/etc/apache2/sites-enabled/000-default.conf state=absent
-    tags:
-      - penatesserver
-  - file: path=/etc/apache2/sites-enabled/000-default state=absent
-    tags:
-      - penatesserver
-  - file: path=/etc/apache2/sites-enabled/{{ penates_directory_fqdn }}.conf src=/etc/apache2/sites-available/{{ penates_directory_fqdn }}.conf state=link
-    tags:
-      - penatesserver
-  - name: copy penatesserver systemd configuration
-    template: src=templates/auth_servers/penatesserver-systemd.service dest=/etc/systemd/system/penatesserver-gunicorn.service
-    tags:
-      - penatesserver
-  - service: name=apache2 state=restarted
-    tags:
-      - penatesserver
-  - command: systemctl enable penatesserver-gunicorn.service
-    tags:
-      - penatesserver
-  - service: name=penatesserver-gunicorn state=restarted
-    tags:
-      - penatesserver
-
-  - apt: pkg=pdns-backend-pgsql
-    tags:
-      - powerdns
-  - apt: pkg=dnsutils
-    tags:
-      - powerdns
-  - apt: pkg=pdns-server
-    tags:
-      - powerdns
-  - apt: pkg=pdns-recursor
-    tags:
-      - powerdns
-  - template: src=templates/auth_servers/pdns.conf dest=/etc/powerdns/pdns.conf owner=pdns group=pdns mode=0644
-    tags:
-      - powerdns
-  - template: src=templates/auth_servers/recursor.conf dest=/etc/powerdns/recursor.conf owner=pdns group=pdns mode=0644
-    tags:
-      - powerdns
-  - service: name=pdns state=restarted
-    tags:
-      - powerdns
-  - service: name=pdns-recursor state=restarted
-    tags:
-      - powerdns
-  - name: open TCP port for PowerDNS
-    ufw: rule=allow port=53 proto=udp
-    tags:
-      - powerdns
-  - name: apply DNSSEC to zones
-    shell: pdnssec secure-all-zones | true
-    tags:
-      - powerdns
-  - name: register DNS service
-    command: penatesserver-manage service dns {{ penates_directory_fqdn }} 53 --role "Service" --fqdn {{ penates_directory_hostname }} --description "Main DNS server" --protocol udp
-    tags:
-      - powerdns
-  - template: src=templates/auth_servers/main_network_interface.cfg dest=/etc/network/interfaces.d/{{ primary_network_interface }}.cfg owner=root group=root mode=0644
-    tags:
-      - networking
-
-  - lineinfile: regexp='iface\s+{{ primary_network_interface }}\s+inet\s+dhcp\s*' state=absent dest=/etc/network/interfaces
-    tags:
-      - networking
-  - lineinfile: regexp='auto\s+{{ primary_network_interface }}\s*' state=absent dest=/etc/network/interfaces
-    tags:
-      - networking
-  - service: name=networking state=restarted
-    tags:
-      - networking
-
-  - command: penatesserver-manage user {{ penates_admin_name }} --password {{ penates_admin_password }} --group {{ penates_administrators_group }} --group {{ penates_users_group }}
-    tags:
-      - penatesserver
-      - users
+#  - name: copy isc-dhcpd configuration
+#    template: src=templates/auth_servers/dhcpd.conf dest=/etc/dhcp/dhcpd.conf
+#    tags:
+#      - dhcp
+##  - lineinfile: regexp="    exec dhcpd -user dhcpd -group dhcpd -f -4 -pf /run/dhcp-server/dhcpd.pid -cf $CONFIG_FILE $INTERFACES" dest=/etc/systemd/system/multi-user.target.wants/isc-dhcp-server.service line="    exec dhcpd -user dhcpd -group dhcpd -f -4 -pf /var/run/dhcp-server/dhcpd.pid -cf $CONFIG_FILE $INTERFACES"
+##    tags:
+##      - dhcp
+##  - lineinfile: regexp="    exec dhcpd -user dhcpd -group dhcpd -f -6 -pf /run/dhcp-server/dhcpd6.pid -cf $CONFIG_FILE $INTERFACES" dest=/etc/systemd/system/multi-user.target.wants/isc-dhcp-server6.service line="    exec dhcpd -user dhcpd -group dhcpd -f -4 -pf /var/run/dhcp-server/dhcpd6.pid -cf $CONFIG_FILE $INTERFACES"
+##    tags:
+##      - dhcp
+#  - command: systemctl daemon-reload
+#    tags:
+#      - dhcp
+#  - service: name=isc-dhcp-server state=restarted
+#    tags:
+#      - dhcp
+#  - name: restart isc-dhcpd6
+#    service: name=isc-dhcp-server6 state=restarted
+#    tags:
+#      - dhcp
+#  - name: open UDP port for DHCP
+#    ufw: rule=allow port=67 proto=udp
+#    tags:
+#      - dhcp
+#  - name: register DHCP service
+#    command: penatesserver-manage service dhcp {{ penates_directory_fqdn }} 67 --role "Service" --fqdn {{ penates_directory_hostname }} --description "Main DHCP server"  --protocol udp
+#    tags:
+#      - dhcp
+#
+#  - apt: pkg=apache2
+#    tags:
+#      - penatesserver
+#  - apt: pkg=libapache2-mod-xsendfile
+#    tags:
+#      - penatesserver
+#  - apt: pkg=libapache2-mod-auth-kerb
+#    tags:
+#      - penatesserver
+#  - apache2_module: state=present name=auth_kerb
+#    tags:
+#      - penatesserver
+#  - apache2_module: state=present name=headers
+#    tags:
+#      - penatesserver
+#  - apache2_module: state=present name=proxy
+#    tags:
+#      - penatesserver
+#  - apache2_module: state=present name=proxy_http
+#    tags:
+#      - penatesserver
+#  - apache2_module: state=present name=ssl
+#    tags:
+#      - penatesserver
+#  - command: penatesserver-manage collectstatic --noinput
+#    sudo_user: penatesserver
+#    tags:
+#      - penatesserver
+#  - name: register HTTP service
+#    command: penatesserver-manage service https {{ penates_directory_fqdn }} 443 --role "Service" --fqdn {{ penates_directory_hostname }} --description "Penates Webservices" --kerberos_service HTTP --keytab /etc/apache2/http.keytab --cert /etc/apache2/{{ penates_directory_fqdn }}.pem --key /etc/apache2/{{ penates_directory_fqdn }}.pem --ca /etc/apache2/{{ penates_directory_fqdn }}.pem
+#    tags:
+#      - penatesserver
+#  - file: path=/var/penatesserver/data state=directory owner=penatesserver recurse=yes group=penatesserver
+#    tags:
+#      - penatesserver
+#  - file: path=/etc/apache2/http.keytab state=file owner=www-data group=www-data mode=0600
+#    tags:
+#      - penatesserver
+#  - file: path=/etc/apache2/{{ penates_directory_fqdn }}.pem state=file owner=www-data group=www-data mode=0600
+#    tags:
+#      - penatesserver
+#  - template: src=templates/auth_servers/penatesserver.conf dest=/etc/apache2/sites-available/{{ penates_directory_fqdn }}.conf owner=www-data group=www-data mode=0644
+#    tags:
+#      - penatesserver
+#  - file: path=/etc/apache2/sites-enabled/000-default.conf state=absent
+#    tags:
+#      - penatesserver
+#  - file: path=/etc/apache2/sites-enabled/000-default state=absent
+#    tags:
+#      - penatesserver
+#  - file: path=/etc/apache2/sites-enabled/{{ penates_directory_fqdn }}.conf src=/etc/apache2/sites-available/{{ penates_directory_fqdn }}.conf state=link
+#    tags:
+#      - penatesserver
+#  - name: copy penatesserver systemd configuration
+#    template: src=templates/auth_servers/penatesserver-systemd.service dest=/etc/systemd/system/penatesserver-gunicorn.service
+#    tags:
+#      - penatesserver
+#  - service: name=apache2 state=restarted
+#    tags:
+#      - penatesserver
+#  - command: systemctl enable penatesserver-gunicorn.service
+#    tags:
+#      - penatesserver
+#  - service: name=penatesserver-gunicorn state=restarted
+#    tags:
+#      - penatesserver
+#
+#  - apt: pkg=pdns-backend-pgsql
+#    tags:
+#      - powerdns
+#  - apt: pkg=dnsutils
+#    tags:
+#      - powerdns
+#  - apt: pkg=pdns-server
+#    tags:
+#      - powerdns
+#  - apt: pkg=pdns-recursor
+#    tags:
+#      - powerdns
+#  - template: src=templates/auth_servers/pdns.conf dest=/etc/powerdns/pdns.conf owner=pdns group=pdns mode=0644
+#    tags:
+#      - powerdns
+#  - template: src=templates/auth_servers/recursor.conf dest=/etc/powerdns/recursor.conf owner=pdns group=pdns mode=0644
+#    tags:
+#      - powerdns
+#  - service: name=pdns state=restarted
+#    tags:
+#      - powerdns
+#  - service: name=pdns-recursor state=restarted
+#    tags:
+#      - powerdns
+#  - name: open TCP port for PowerDNS
+#    ufw: rule=allow port=53 proto=udp
+#    tags:
+#      - powerdns
+#  - name: apply DNSSEC to zones
+#    shell: pdnssec secure-all-zones | true
+#    tags:
+#      - powerdns
+#  - name: register DNS service
+#    command: penatesserver-manage service dns {{ penates_directory_fqdn }} 53 --role "Service" --fqdn {{ penates_directory_hostname }} --description "Main DNS server" --protocol udp
+#    tags:
+#      - powerdns
+#  - template: src=templates/auth_servers/main_network_interface.cfg dest=/etc/network/interfaces.d/{{ primary_network_interface }}.cfg owner=root group=root mode=0644
+#    tags:
+#      - networking
+#
+#  - lineinfile: regexp='iface\s+{{ primary_network_interface }}\s+inet\s+dhcp\s*' state=absent dest=/etc/network/interfaces
+#    tags:
+#      - networking
+#  - lineinfile: regexp='auto\s+{{ primary_network_interface }}\s*' state=absent dest=/etc/network/interfaces
+#    tags:
+#      - networking
+#  - service: name=networking state=restarted
+#    tags:
+#      - networking
+#
+#  - command: penatesserver-manage user {{ penates_admin_name }} --password {{ penates_admin_password }} --group {{ penates_administrators_group }} --group {{ penates_users_group }}
+#    tags:
+#      - penatesserver
+#      - users
