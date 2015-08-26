@@ -466,3 +466,8 @@
   - service: name=networking state=restarted
     tags:
       - networking
+
+  - command: penatesserver-manage user {{ penates_admin_name }} --password {{ penates_admin_password }} --group {{ penates_administrators_group }} --group {{ penates_users_group }}
+    tags:
+      - penatesserver
+      - users

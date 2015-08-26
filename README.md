@@ -60,10 +60,10 @@ Step 1
   * [OK] group creation
   * [OK] set user password
   * [OK] get self certificate
-  * [OK] pkinit
-  * tests pour chaque étape
+  * [OK] pkinit : kinit -X "X509_user_identity=FILE:${cert}" ${principal}  ; kinit -C FILE:${cert} ${principal}
+  * [OK] tests pour chaque étape
+  * DANE
   * DNSSEC
-  * DNS / DANE
   * mail
   * revoke certificate
 
@@ -71,12 +71,15 @@ Step 2
 ------
 
   * kerberos authent on machines
+  * sudo for admins
   * LDAP autz on machines (netgroups)
   * TFTP server + ISO mirror
   * ubuntu mirror
   * moneta mirror
   * supervision
   * logging
+  * remove machine
+  * disable user
 
 Step 3
 ------
