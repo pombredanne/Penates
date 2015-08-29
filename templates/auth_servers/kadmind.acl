@@ -1,1 +1,1 @@
-penatesserver/admin@{{ penates_domain|upper }} all
+penatesserver/admin@{{ penates_domain|upper }} all,get-keys
