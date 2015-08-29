@@ -467,3 +467,21 @@
     tags:
       - penatesserver
       - users
+  - shell: echo {{ penates_admin_password }} | kinit  --password-file=STDIN  {{ penates_admin_name }}@{{ penates_domain|upper }}
+    tags:
+      - users
+  - command: "curl --anyauth -u : -o /tmp/admin.pem https://{{ penates_directory_fqdn }}/auth/get_user_certificate/"
+    tags:
+      - users
+  - command: kdestroy
+    tags:
+      - users
+  - command: kinit -C FILE:/tmp/admin.pem {{ penates_admin_name }}@{{ penates_domain|upper }}
+    tags:
+      - users
+  - command: kdestroy
+    tags:
+      - users
+  - file: path=/tmp/admin.pem state=absent
+    tags:
+      - users
