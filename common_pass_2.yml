@@ -17,9 +17,6 @@
   - command: "k5start -q -f /etc/krb5.keytab -U -- curl --data-binary @/etc/ssh/ssh_host_rsa_key.pub --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_ssh_pub/"
   - name: hosts configuration
     template: src=templates/common/hosts dest=/etc/hosts
-  - apt: pkg=krb5-pkinit
-    tags:
-      - kerberos
 
   - shell: "ifconfig | grep -B 2 `k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_info/ | grep REMOTE_ADDR | cut -f 2 -d ':'` | grep HWaddr | cut -d 'H' -f 2 | cut -d ' ' -f 2"
     register: primary_mac_address
@@ -37,6 +34,22 @@
   - service: name=ntp state=restarted
     tags:
       - ntp
+
+  - apt: pkg=krb5-pkinit
+    tags:
+      - authent
+  - apt: pkg=libpam-krb5
+    tags:
+      - authent
+  - apt: pkg=libpam-ccreds
+    tags:
+      - authent
+  - template: src=templates/common/sshd_config dest=/etc/ssh/sshd_config
+    tags:
+      - authent
+  - service: name=ssh state=restarted
+    tags:
+      - authent
 
 - hosts: auth_servers
   remote_user: root

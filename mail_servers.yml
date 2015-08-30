@@ -1,0 +1,40 @@
+---
+- hosts: mail_servers
+  remote_user: root
+  vars:
+    mail_fqdn: "mail{{ groups['auth_servers'].index(inventory_hostname) + 1 }}.{{ penates_domain }}"
+#    mail_fqdn: "mail{{ '%02d' % groups['auth_servers'].index(inventory_hostname) + 1 }}.{{ penates_domain }}"
+  tasks:
+  - apt: pkg=libdb5.3
+  - apt: pkg=db5.1-util
+  - apt: pkg=postfix
+  - apt: pkg=procmail
+  - apt: pkg=sasl2-bin
+  - apt: pkg=libsasl2-modules
+  - apt: pkg=libsasl2-modules-sql
+  - apt: pkg=libgsasl7
+  - apt: pkg=libauthen-sasl-cyrus-perl
+  - apt: pkg=libpam-mysql
+  - apt: pkg=libsasl2-modules-gssapi-heimdal
+
+  - user: name=postfix groups=sasl,postfix
+  - template: src=templates/mail_servers/main.cf dest=/etc/postfix/main.cf owner=root group=root mode=0644
+  - template: src=templates/mail_servers/smtpd.conf dest=/etc/postfix/sasl/smtpd.conf owner=root group=root mode=0644
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /tmp/log --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/smtp/{{ mail_fqdn }}/25/?keytab=smtp"
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/postfix/smtp.keytab --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_keytab/smtp/{{ mail_fqdn }}/25/?keytab=smtp"
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/postfix/{{ mail_fqdn }}.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/smtp/{{ mail_fqdn }}/25/"
+  - command: "openssl x509 -in /etc/postfix/{{ mail_fqdn }}.pem -out /etc/postfix/{{ mail_fqdn }}.crt.pem"
+  - command: "openssl rsa -in /etc/postfix/{{ mail_fqdn }}.pem -out /etc/postfix/{{ mail_fqdn }}.key.pem"
+  - file: path=/etc/postfix/{{ mail_fqdn }}.key.pem mode=0600 owner=postfix group=postfix
+  - file: path=/etc/postfix/{{ mail_fqdn }}.pem mode=0600 owner=postfix group=postfix
+  - command: "k5start -q -f /etc/postfix/smtp.keytab -U -- echo 'OK'"
+  - file: path=/var/spool/postfix/var/run/saslauthd state=directory
+  - file: path=/var/run/saslauthd force=yes src=/var/spool/postfix/var/run/saslauthd state=link
+  - file: path=/var/spool/postfix/var/ group=sasl owner=root recurse=yes state=directory
+  - file: path=/var/spool/postfix/var/run/saslauthd mode=0710
+  - lineinfile: regexp="START=no" state=absent dest=/etc/default/saslauthd
+  - lineinfile: regexp="OPTIONS=\"-c -m /var/run/saslauthd\"" state=absent  dest=/etc/default/saslauthd
+  - lineinfile: state=present line="START=yes" dest=/etc/default/saslauthd
+  - lineinfile: state=present line="OPTIONS=\"-m /var/spool/postfix/var/run/saslauthd\""  dest=/etc/default/saslauthd
+  - service: state=restarted name=saslauthd
+  - service: state=restarted name=postfix

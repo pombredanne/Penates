@@ -65,7 +65,7 @@ Step 1
   * DANE
   * DNSSEC
   * mail
-  * revoke certificate
+  * [OK] revoke certificate
 
 Step 2
 ------

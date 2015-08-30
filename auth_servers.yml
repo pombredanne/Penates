@@ -1,7 +1,5 @@
 ---
 - hosts: auth_servers
-  vars:
-    domain_name: test.org
   remote_user: root
   tasks:
   - name: set the hostname
