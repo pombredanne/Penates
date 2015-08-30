@@ -78,3 +78,6 @@
   - service: name=isc-dhcp-server state=restarted
     tags:
       - dhcp
+  - service: name=pdns-recursor state=restarted
+    tags:
+      - dhcp
