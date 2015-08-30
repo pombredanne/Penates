@@ -38,16 +38,34 @@
   - apt: pkg=krb5-pkinit
     tags:
       - authent
+  - apt: pkg=libnss-ldapd
+    tags:
+      - authent
   - apt: pkg=libpam-heimdal
     tags:
       - authent
   - apt: pkg=libpam-ccreds
     tags:
       - authent
+  - template: src=templates/common/nslcd.conf dest=/etc/nslcd.conf
+    tags:
+      - authent
+  - template: src=templates/common/nsswitch.conf dest=/etc/nsswitch.conf
+    tags:
+      - authent
   - template: src=templates/common/sshd_config dest=/etc/ssh/sshd_config
     tags:
       - authent
+  - template: src=templates/common/pam.d/common-session dest=/etc/pam.d/common-session
+    tags:
+      - authent
   - service: name=ssh state=restarted
+    tags:
+      - authent
+  - service: name=nslcd state=restarted
+    tags:
+      - authent
+  - service: name=nscd state=restarted
     tags:
       - authent
 

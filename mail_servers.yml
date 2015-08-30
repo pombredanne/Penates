@@ -19,7 +19,8 @@
 
   - user: name=postfix groups=sasl,postfix
   - template: src=templates/mail_servers/main.cf dest=/etc/postfix/main.cf owner=root group=root mode=0644
-  - template: src=templates/mail_servers/smtpd.conf dest=/etc/postfix/sasl/smtpd.conf owner=root group=root mode=0644
+  - template: src=templates/mail_servers/main.cf dest=/etc/postfix/main.cf owner=root group=root mode=0644
+  - template: src=templates/mail_servers/mailname dest=/etc/mailname owner=root group=root mode=0644
   - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /tmp/log --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/smtp/{{ mail_fqdn }}/25/?keytab=smtp"
   - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/postfix/smtp.keytab --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_keytab/smtp/{{ mail_fqdn }}/25/?keytab=smtp"
   - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/postfix/{{ mail_fqdn }}.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/smtp/{{ mail_fqdn }}/25/"

@@ -5,7 +5,7 @@ After=network.target
 User=penatesserver
 Group=penatesserver
 WorkingDirectory=/var/penatesserver/
-ExecStart=/usr/local/bin/penatesserver-gunicorn
+ExecStart=/usr/local/bin/penatesserver-gunicorn -t 10000
 ExecReload=/bin/kill -s HUP $MAINPID
 ExecStop=/bin/kill -s TERM $MAINPID
 [Install]

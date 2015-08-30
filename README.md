@@ -65,20 +65,22 @@ Step 1
   * DANE
   * DNSSEC
   * mail
+  * kerberos authent on machines
+  * sudo for admins
+  * LDAP autz on machines (netgroups)
   * [OK] revoke certificate
 
 Step 2
 ------
 
-  * kerberos authent on machines
-  * sudo for admins
-  * LDAP autz on machines (netgroups)
+  * ISO generation
   * TFTP server + ISO mirror
   * ubuntu mirror
   * moneta mirror
   * supervision
   * logging
   * remove machine
+  * remove service
   * disable user
 
 Step 3
