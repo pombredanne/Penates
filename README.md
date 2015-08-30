@@ -105,6 +105,7 @@ Step 5
   * Updoc
   * Vagrant mirror
   * SIP
+  * CardDAV, CalDAV
   * pypi mirror
   
 Step 6

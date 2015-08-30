@@ -38,7 +38,7 @@
   - apt: pkg=krb5-pkinit
     tags:
       - authent
-  - apt: pkg=libpam-krb5
+  - apt: pkg=libpam-heimdal
     tags:
       - authent
   - apt: pkg=libpam-ccreds
