@@ -1,5 +1,5 @@
 ---
-- hosts: all_servers
+- hosts: all_machines
   remote_user: root
   tasks:
   - stat: path=/etc/krb5.keytab
@@ -51,6 +51,9 @@
     tags:
       - authent
   - template: src=templates/common/nsswitch.conf dest=/etc/nsswitch.conf
+    tags:
+      - authent
+  - template: src=templates/common/sudoers dest=/etc/sudoers mode=0440 owner=root group=root
     tags:
       - authent
   - template: src=templates/common/sshd_config dest=/etc/ssh/sshd_config

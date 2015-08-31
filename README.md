@@ -67,8 +67,8 @@ Step 1
   * mail
   * [OK] kerberos authent on machines
   * [OK] revoke certificate
-  * sudo for admins
-  * LDAP autz on machines (netgroups)
+  * [OK] sudo for admins
+  * [OK] LDAP autz on machines (netgroups)
   
   ldapsearch -x '(&(objectClass=posixAccount)(memberof=cn=Administrators,ou=CoreGroups,dc=test,dc=example,dc=org))' -LLL
   ldapsearch -x '(&(objectClass=posixAccount)(memberof=cn=Users,ou=CoreGroups,dc=test,dc=example,dc=org))' -LLL

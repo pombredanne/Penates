@@ -1,5 +1,5 @@
 ---
-- hosts: all_servers
+- hosts: all_machines
   remote_user: root
   tasks:
   - copy: src=files/common/sources.list dest=/etc/apt/sources.list owner=root mode=0644 group=root
