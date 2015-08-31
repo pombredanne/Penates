@@ -163,6 +163,10 @@
     copy: src=files/auth_servers/samba.ldif dest=/etc/ldap/schema/samba.ldif
     tags:
       - ldap
+  - name: copy overlay.ldif
+    copy: src=files/auth_servers/overlay.ldif dest=/etc/ldap/schema/overlay.ldif
+    tags:
+      - ldap
   - name: copy base OpenLDAP configuration
     template: src=templates/auth_servers/openldap_config.ldif dest=/etc/ldap/config.ldif
     tags:
@@ -197,6 +201,10 @@
       - ldap
   - name: import base data
     shell: ldapmodify -Y EXTERNAL -H ldapi:/// -f /etc/ldap/config.ldif
+    tags:
+      - ldap
+  - name: import overlay.ldif
+    shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/overlay.ldif | true
     tags:
       - ldap
   - name: import configuration
@@ -460,6 +468,16 @@
   - service: name=networking state=restarted
     tags:
       - networking
+
+  - command: penatesserver-manage group {{ penates_administrators_group }}
+    tags:
+      - penatesserver
+  - command: penatesserver-manage group {{ penates_guests_group }}
+    tags:
+      - penatesserver
+  - command: penatesserver-manage group {{ penates_users_group }}
+    tags:
+      - penatesserver
 
   - command: penatesserver-manage user {{ penates_admin_name }} --password {{ penates_admin_password }} --group {{ penates_administrators_group }} --group {{ penates_users_group }}
     tags:

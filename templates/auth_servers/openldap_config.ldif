@@ -40,6 +40,7 @@ olcDbIndex: sambaGroupType eq
 olcDbIndex: sambaSIDList eq
 olcDbIndex: sambaDomainName eq
 olcDbIndex: default sub
+olcDbIndex: member eq
 -
 replace: olcLastMod
 olcLastMod: TRUE

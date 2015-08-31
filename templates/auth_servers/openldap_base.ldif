@@ -28,6 +28,10 @@ dn: ou=Groups,{{ penates_domain|hostname_to_dn}}
 objectClass: organizationalUnit
 ou: Groups
 
+dn: ou=CoreGroups,{{ penates_domain|hostname_to_dn}}
+objectClass: organizationalUnit
+ou: CoreGroups
+
 dn: ou=netgroup,{{ penates_domain|hostname_to_dn}}
 objectClass: organizationalUnit
 ou: netgroup
@@ -35,30 +39,6 @@ ou: netgroup
 dn: ou=Computers,{{ penates_domain|hostname_to_dn}}
 objectClass: organizationalUnit
 ou: Computers
-
-dn: cn={{ penates_administrators_group }},ou=Groups,{{ penates_domain|hostname_to_dn}}
-objectClass: posixGroup
-objectClass: sambaGroupMapping
-sambaGroupType: 2
-sambaSID: {{ samba_sid }}-10000
-cn: {{ penates_administrators_group }}
-gidNumber: 10000
-
-dn: cn={{ penates_users_group }},ou=Groups,{{ penates_domain|hostname_to_dn}}
-objectClass: posixGroup
-objectClass: sambaGroupMapping
-sambaGroupType: 2
-sambaSID: {{ samba_sid }}-10001
-cn: {{ penates_users_group }}
-gidNumber: 10001
-
-dn: cn={{ penates_guests_group }},ou=Groups,{{ penates_domain|hostname_to_dn}}
-objectClass: posixGroup
-objectClass: sambaGroupMapping
-sambaGroupType: 2
-sambaSID: {{ samba_sid }}-10002
-cn: {{ penates_guests_group }}
-gidNumber: 10002
 
 dn: ou=Services,{{ penates_domain|hostname_to_dn}}
 objectClass: organizationalUnit
