@@ -69,10 +69,6 @@ Step 1
   * [OK] revoke certificate
   * [OK] sudo for admins
   * [OK] LDAP autz on machines (netgroups)
-  
-  ldapsearch -x '(&(objectClass=posixAccount)(memberof=cn=Administrators,ou=CoreGroups,dc=test,dc=example,dc=org))' -LLL
-  ldapsearch -x '(&(objectClass=posixAccount)(memberof=cn=Users,ou=CoreGroups,dc=test,dc=example,dc=org))' -LLL
-
 
 Step 2
 ------
@@ -126,3 +122,11 @@ Step 7
   * 802.1x
   * backup
   * restauration depuis le backup
+  
+  
+Notes
+-----
+
+  ldapsearch -x '(&(objectClass=posixAccount)(memberof=cn=Administrators,ou=CoreGroups,dc=test,dc=example,dc=org))' -LLL
+  ldapsearch -x '(&(objectClass=posixAccount)(memberof=cn=Users,ou=CoreGroups,dc=test,dc=example,dc=org))' -LLL
+
