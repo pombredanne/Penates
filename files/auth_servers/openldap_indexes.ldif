@@ -1,0 +1,20 @@
+dn: olcDatabase={1}hdb,cn=config
+changetype: modify
+replace: olcDbIndex
+olcDbIndex: objectClass eq
+olcDbIndex: krbPrincipalName eq,pres,sub
+olcDbIndex: cn eq
+olcDbIndex: gidNumber eq,pres
+olcDbIndex: memberUid eq,pres,sub
+olcDbIndex: uid eq,pres,sub
+olcDbIndex: uidNumber eq,pres
+olcDbIndex: uniqueMember eq,pres
+olcDbIndex: loginShell eq
+olcDbIndex: sambaSID eq
+olcDbIndex: sambaPrimaryGroupSID eq
+olcDbIndex: sambaGroupType eq
+olcDbIndex: sambaSIDList eq
+olcDbIndex: sambaDomainName eq
+olcDbIndex: default sub
+olcDbIndex: member eq
+olcDbIndex: memberOf eq

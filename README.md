@@ -64,7 +64,13 @@ Step 1
   * [OK] tests pour chaque étape
   * DANE
   * DNSSEC
-  * mail
+  * SMTP
+    * système (sans auth mais local uniquement)
+    * utilisateur (kerberos)
+    
+  * IMAP4
+    * utilisateur (kerberos)
+
   * [OK] kerberos authent on machines
   * [OK] revoke certificate
   * [OK] sudo for admins
@@ -88,7 +94,6 @@ Step 3
 
   * XML profiles for iOS / OS X
   * XMPP
-  * IMAP/POP3
   * proxy HTTP + kerberos
 
 Step 4

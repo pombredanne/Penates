@@ -171,6 +171,10 @@
     template: src=templates/auth_servers/openldap_config.ldif dest=/etc/ldap/config.ldif
     tags:
       - ldap
+  - name: copy base OpenLDAP configuration
+    template: src=files/auth_servers/openldap_indexes.ldif dest=/etc/ldap/indexes.ldif
+    tags:
+      - ldap
   - name: register LDAP service
     command: penatesserver-manage service ldaps {{ penates_directory_fqdn }} 636 --fqdn {{ penates_directory_hostname }} --description "Main LDAP server" --cert /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.crt --key /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.key
     tags:
@@ -211,8 +215,7 @@
     shell: ldapadd -c -x -D cn=admin,{{ penates_domain|hostname_to_dn }} -w {{ ldap_root_password }} -H ldapi:///  -f /etc/ldap/base.ldif | true
     tags:
       - ldap
-  - name: open TCP port for LDAP
-    ufw: rule=allow port=636 proto=tcp
+  - ufw: rule=allow port=636 proto=tcp
     tags:
       - ldap
   - file: path=/etc/ldap/config.ldif state=absent
@@ -229,6 +232,13 @@
       - ldap
   - name: restart OpenLDAP
     service: name=slapd state=restarted
+    tags:
+      - ldap
+  - name: import base data
+    shell: ldapmodify -Y EXTERNAL -H ldapi:/// -f /etc/ldap/indexes.ldif
+    tags:
+      - ldap
+  - file: path=/etc/ldap/indexes.ldif state=absent
     tags:
       - ldap
   - command: ldapsearch -x -H ldaps://{{ penates_directory_fqdn }}/
@@ -284,12 +294,10 @@
   - service: name=openbsd-inetd state=restarted
     tags:
       - kerberos
-  - name: open TCP port for Kerberos
-    ufw: rule=allow port=88 proto=tcp
+  - ufw: rule=allow port=88 proto=tcp
     tags:
       - kerberos
-  - name: open UDP port for Kerberos
-    ufw: rule=allow port=88 proto=udp
+  - ufw: rule=allow port=88 proto=udp
     tags:
       - kerberos
   - shell: kadmin -l add --random-key --max-ticket-life=1d --max-renewable-life=1w --expiration-time=never --attributes= --pw-expiration-time=never --policy=default penatesserver/admin | true
@@ -339,8 +347,7 @@
     service: name=isc-dhcp-server6 state=restarted
     tags:
       - dhcp
-  - name: open UDP port for DHCP
-    ufw: rule=allow port=67 proto=udp
+  - ufw: rule=allow port=67 proto=udp
     tags:
       - dhcp
   - name: register DHCP service
@@ -418,6 +425,9 @@
   - service: name=penatesserver-gunicorn state=restarted
     tags:
       - penatesserver
+  - ufw: rule=allow port=443 proto=tcp
+    tags:
+      - penatesserver
 
   - apt: pkg=pdns-backend-pgsql
     tags:
@@ -443,8 +453,7 @@
   - service: name=pdns-recursor state=restarted
     tags:
       - powerdns
-  - name: open TCP port for PowerDNS
-    ufw: rule=allow port=53 proto=udp
+  - ufw: rule=allow port=53 proto=udp
     tags:
       - powerdns
   - name: apply DNSSEC to zones

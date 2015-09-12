@@ -33,7 +33,7 @@ alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
 mydestination = localhost, localhost.{{ penates_domain }}, {{ penates_domain }}
 relayhost = {{ mail_relay_hostname }}
-mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128 {{ penates_subnet|subnet_address }}/{{ penates_subnet|subnet_mask_len }}
+mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128 {% if penates_subnet|subnet_version == 4 %}{{ penates_subnet|subnet_address }}{% else %}[{{ penates_subnet|subnet_address }}]{% endif %}/{{ penates_subnet|subnet_mask_len }}
 mailbox_size_limit = 51200000
 recipient_delimiter = +
 inet_interfaces = all
@@ -41,11 +41,11 @@ inet_protocols = all
 myorigin = /etc/mailname
 mailbox_command = procmail -a "$EXTENSION"
 
+import_environment="KRB5_KTNAME=/etc/postfix/smtp.keytab"
 smtpd_sasl_local_domain = {{ penates_domain }}
 smtpd_sasl_auth_enable = yes
 smtpd_sasl_security_options = noanonymous
 smtpd_sasl_path = smtpd
-broken_sasl_auth_clients = yes
 smtpd_recipient_restrictions = permit_sasl_authenticated,permit_mynetworks,reject_unauth_destination
 inet_interfaces = all
 smtpd_tls_auth_only = no
@@ -56,3 +56,4 @@ smtpd_tls_loglevel = 1
 smtpd_tls_received_header = yes
 smtpd_tls_session_cache_timeout = 3600s
 tls_random_source = dev:/dev/urandom
+cyrus_sasl_config_path = /etc/postfix/sasl

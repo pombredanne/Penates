@@ -4,7 +4,6 @@
   vars:
     mail_fqdn: "mail{{ '%02d' % (groups['auth_servers'].index(inventory_hostname) + 1) }}.{{ penates_domain }}"
   tasks:
-  - apt: pkg=libdb5.3
   - apt: pkg=db5.1-util
   - apt: pkg=postfix
   - apt: pkg=procmail
@@ -31,7 +30,8 @@
   - command: "k5start -q -f /etc/postfix/smtp.keytab -U -- echo 'OK'"
   - file: path=/var/spool/postfix/var/run/saslauthd state=directory
   - file: path=/var/run/saslauthd force=yes src=/var/spool/postfix/var/run/saslauthd state=link
-  - file: path=/var/spool/postfix/var/ group=sasl owner=root recurse=yes state=directory
+  - file: path=/var/spool/postfix/var/tmp state=directory
+  - file: path=/var/spool/postfix/var/ group=sasl owner=postfix recurse=yes state=directory
   - file: path=/var/spool/postfix/var/run/saslauthd mode=0710
   - lineinfile: regexp="START=no" state=absent dest=/etc/default/saslauthd
   - lineinfile: regexp="OPTIONS=\"-c -m /var/run/saslauthd\"" state=absent  dest=/etc/default/saslauthd
