@@ -492,6 +492,10 @@
     tags:
       - penatesserver
       - users
+  - command: penatesserver-manage user {{ penates_user_name }} --password {{ penates_user_password }} --group {{ penates_users_group }}
+    tags:
+      - penatesserver
+      - users
   - shell: echo {{ penates_admin_password }} | kinit  --password-file=STDIN  {{ penates_admin_name }}@{{ penates_domain|upper }}
     tags:
       - users

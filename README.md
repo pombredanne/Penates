@@ -64,7 +64,7 @@ Step 1
   * [OK] tests pour chaque étape
   * DANE
   * DNSSEC
-  * SMTP
+  * SMTP, SPF
     * système (sans auth mais local uniquement)
     * utilisateur (kerberos)
     

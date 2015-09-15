@@ -4,40 +4,44 @@
   vars:
     mail_fqdn: "mail{{ '%02d' % (groups['auth_servers'].index(inventory_hostname) + 1) }}.{{ penates_domain }}"
   tasks:
-  - apt: pkg=db5.1-util
-  - apt: pkg=postfix
-  - apt: pkg=procmail
-  - apt: pkg=sasl2-bin
-  - apt: pkg=libsasl2-modules
-  - apt: pkg=libsasl2-modules-sql
-  - apt: pkg=libgsasl7
-  - apt: pkg=libauthen-sasl-cyrus-perl
-  - apt: pkg=libpam-mysql
-  - apt: pkg=libsasl2-modules-gssapi-heimdal
-
-  - user: name=postfix groups=sasl,postfix
-  - template: src=templates/mail_servers/main.cf dest=/etc/postfix/main.cf owner=root group=root mode=0644
-  - template: src=templates/mail_servers/master.cf dest=/etc/postfix/master.cf owner=root group=root mode=0644
-  - template: src=templates/mail_servers/mailname dest=/etc/mailname owner=root group=root mode=0644
-  - template: src=templates/mail_servers/smtpd.conf dest=/etc/postfix/sasl/smtpd.conf owner=root group=root mode=0644
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /tmp/log --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/smtp/{{ mail_fqdn }}/25/?keytab=smtp"
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/postfix/smtp.keytab --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_keytab/smtp/{{ mail_fqdn }}/25/?keytab=smtp"
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/postfix/{{ mail_fqdn }}.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/smtp/{{ mail_fqdn }}/25/"
-  - command: "openssl x509 -in /etc/postfix/{{ mail_fqdn }}.pem -out /etc/postfix/{{ mail_fqdn }}.crt.pem"
-  - command: "openssl rsa -in /etc/postfix/{{ mail_fqdn }}.pem -out /etc/postfix/{{ mail_fqdn }}.key.pem"
-  - file: path=/etc/postfix/{{ mail_fqdn }}.key.pem mode=0600 owner=postfix group=postfix
-  - file: path=/etc/postfix/{{ mail_fqdn }}.pem mode=0600 owner=postfix group=postfix
-  - command: "k5start -q -f /etc/postfix/smtp.keytab -U -- echo 'OK'"
-  - file: path=/var/spool/postfix/var/run/saslauthd state=directory
-  - file: path=/var/run/saslauthd force=yes src=/var/spool/postfix/var/run/saslauthd state=link
-  - file: path=/var/spool/postfix/var/tmp state=directory
-  - file: path=/var/spool/postfix/var/ group=sasl owner=postfix recurse=yes state=directory
-  - file: path=/var/spool/postfix/var/run/saslauthd mode=0710
-  - lineinfile: regexp="START=no" state=absent dest=/etc/default/saslauthd
-  - lineinfile: regexp="OPTIONS=\"-c -m /var/run/saslauthd\"" state=absent  dest=/etc/default/saslauthd
-  - lineinfile: state=present line="START=yes" dest=/etc/default/saslauthd
-  - lineinfile: state=present line="OPTIONS=\"-m /var/spool/postfix/var/run/saslauthd\""  dest=/etc/default/saslauthd
-  - service: state=restarted name=saslauthd
-  - service: state=restarted name=postfix
-  - name: open TCP port for SMTP
-    ufw: rule=allow port=25 proto=tcp
+  - apt: pkg=opensmtpd
+  - file: path=/etc/opensmtpd state=directory
+  - template: src=templates/mail_servers/aliases dest=/etc/opensmtpd/aliases owner=root group=root mode=0644
+  - template: src=templates/mail_servers/smarthost dest=/etc/opensmtpd/smarthost owner=root group=root mode=0644
+  - template: src=templates/mail_servers/smtpd.conf dest=/etc/smtpd.conf owner=root group=root mode=0644
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/smtp/{{ mail_fqdn }}/25/?keytab=smtp"
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/smtp/{{ mail_fqdn }}/465/"
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/smtp/{{ mail_fqdn }}/587/"
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/opensmtpd/smtp.keytab --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_keytab/smtp/{{ mail_fqdn }}/25/?keytab=smtp"
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/opensmtpd/{{ mail_fqdn }}.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/smtp/{{ mail_fqdn }}/25/"
+  - command: "openssl x509 -in /etc/opensmtpd/{{ mail_fqdn }}.pem -out /etc/opensmtpd/{{ mail_fqdn }}.crt"
+  - command: "openssl rsa -in /etc/opensmtpd/{{ mail_fqdn }}.pem -out /etc/opensmtpd/{{ mail_fqdn }}.key"
+  - file: path=/etc/opensmtpd/{{ mail_fqdn }}.pem mode=0o600 owner=root group=root
+  - file: path=/etc/opensmtpd/{{ mail_fqdn }}.key mode=0o600 owner=root group=root
+  - file: path=/etc/opensmtpd/smtp.keytab mode=0600 owner=opensmtpd group=opensmtpd
+  - file: path=/var/mail state=directory owner=root group=mail mode=0o777
+  - command: "k5start -q -f /etc/opensmtpd/smtp.keytab -U -- echo 'OK'"
+  - service: state=restarted name=opensmtpd
+  - ufw: rule=allow port=25 proto=tcp
+  - ufw: rule=allow port=465 proto=tcp
+  - ufw: rule=allow port=587 proto=tcp
+  - apt: pkg=dovecot-imapd
+  - apt: pkg=dovecot-lmtpd
+  - apt: pkg=dovecot-ldap
+  - apt: pkg=dovecot-sieve
+  - apt: pkg=dovecot-gssapi
+  - apt: pkg=dovecot-managesieved
+  - file: path=/etc/dovecot state=directory
+  - template: src=templates/mail_servers/dovecot.conf dest=/etc/dovecot/dovecot.conf owner=root group=root mode=0644
+  - template: src=templates/mail_servers/dovecot-ldap.conf dest=/etc/dovecot/dovecot-ldap.conf owner=root group=root mode=0644
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/imap/{{ mail_fqdn }}/993/?keytab=imap"
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/dovecot/imap.keytab --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_keytab/imap/{{ mail_fqdn }}/993/?keytab=imap"
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/dovecot/{{ mail_fqdn }}.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/imap/{{ mail_fqdn }}/993/"
+  - command: "openssl x509 -in /etc/dovecot/{{ mail_fqdn }}.pem -out /etc/dovecot/{{ mail_fqdn }}.crt"
+  - command: "openssl rsa -in /etc/dovecot/{{ mail_fqdn }}.pem -out /etc/dovecot/{{ mail_fqdn }}.key"
+  - file: path=/etc/dovecot/{{ mail_fqdn }}.pem mode=0600 owner=root group=root
+  - file: path=/etc/dovecot/{{ mail_fqdn }}.key mode=0600 owner=root group=root
+  - file: path=/etc/dovecot/imap.keytab mode=0600 owner=dovecot group=dovecot
+  - command: "k5start -q -f /etc/dovecot/imap.keytab -U -- echo 'OK'"
+  - ufw: rule=allow port=993 proto=tcp
+  - service: state=restarted name=dovecot

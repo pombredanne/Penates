@@ -1,0 +1,2 @@
+{% if mail_relay_user %}{{ mail_relay_user }}: {{ mail_relay_password }}
+{% endif %}
