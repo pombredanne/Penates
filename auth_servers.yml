@@ -2,6 +2,7 @@
 - hosts: auth_servers
   remote_user: root
   tasks:
+  - include: common_pass_1.yml
   - name: set the hostname
     template: src=templates/auth_servers/hostname dest=/etc/hostname owner=root group=root mode=0644
     tags:
@@ -514,3 +515,4 @@
   - file: path=/tmp/admin.pem state=absent
     tags:
       - users
+  - include: common_pass_1.yml

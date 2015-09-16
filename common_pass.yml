@@ -1,0 +1,6 @@
+---
+- hosts: all_machines
+  remote_user: root
+  tasks:
+  - include: common_pass_1.yml
+  - include: common_pass_2.yml

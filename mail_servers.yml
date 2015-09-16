@@ -5,7 +5,13 @@
     mail_fqdn: "mail{{ '%02d' % (groups['auth_servers'].index(inventory_hostname) + 1) }}.{{ penates_domain }}"
   tasks:
   - apt: pkg=amavisd-new
-  - template: src=templates/mail_servers/amavisd.conf dest=/etc/amavisd.conf owner=root group=root mode=0644
+  - template: src=templates/mail_servers/amavis_05-node_id.conf dest=/etc/amavis/conf.d/05-node_id owner=root group=root mode=0644
+  - template: src=templates/mail_servers/amavis_99-local.conf dest=/etc/amavis/conf.d/99-local owner=root group=root mode=0644
+  - apt: pkg=spamassassin
+  - template: src=templates/mail_servers/mailname.txt dest=/etc/mailname owner=root group=root mode=0644
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/dkim/{{ mail_fqdn }}/10026/"
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/amavis/cert.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/dkim/{{ mail_fqdn }}/10026/"
+  - command: "openssl rsa -in /etc/amavis/cert.pem -out /etc/amavis/dkim.pem"
   - service: state=restarted name=amavis
 
   - apt: pkg=dovecot-imapd
@@ -33,7 +39,8 @@
   - file: path=/etc/opensmtpd state=directory
   - template: src=templates/mail_servers/aliases dest=/etc/opensmtpd/aliases owner=root group=root mode=0644
   - template: src=templates/mail_servers/smarthost dest=/etc/opensmtpd/smarthost owner=root group=root mode=0644
-  - template: src=templates/mail_servers/smtpd.conf dest=/etc/smtpd.conf owner=root group=root mode=0644
+  - template: src=templates/mail_servers/dovecot.conf dest=/etc/dovecot/dovecot.conf owner=root group=root mode=0644
+  - template: src=templates/mail_servers/mailname dest=/etc/mail/mailname owner=root group=root mode=0644
   - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/smtp/{{ mail_fqdn }}/25/?keytab=smtp"
   - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/smtp/{{ mail_fqdn }}/465/"
   - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/smtp/{{ mail_fqdn }}/587/"
