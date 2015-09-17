@@ -64,12 +64,18 @@ Step 1
   * [OK] tests pour chaque étape
   * DANE
   * DNSSEC
-  * SMTP, SPF
-    * système (sans auth mais local uniquement)
+  * SMTP
+    * [OK] système (sans auth mais local uniquement)
+    * [OK] utilisateur (ldap)
+    * [OK] spamassassin
+    * dkim
+    * spf
+    * clamav
     * utilisateur (kerberos)
     
-  * IMAP4
-    * utilisateur (kerberos)
+  * [OK] IMAP4
+    * [OK] utilisateur (ldap)
+    * [OK] utilisateur (kerberos)
 
   * [OK] kerberos authent on machines
   * [OK] revoke certificate
@@ -118,7 +124,7 @@ Step 5
 Step 6
 ------
 
-  * infrastucture secondaire (LDAP, Kerberos, DNS+Postgres, DHCP, NTP)
+  * infrastucture secondaire (LDAP, Kerberos, DNS+Postgres, DHCP, NTP, SMTP, Log)
   
 Step 7
 ------
