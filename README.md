@@ -70,7 +70,7 @@ Step 1
     * [OK] spamassassin
     * [OK] dkim
     * [OK] spf
-    * clamav
+    * [OK] clamav
     * utilisateur (kerberos)
     
   * [OK] IMAP4

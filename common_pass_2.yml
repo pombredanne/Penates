@@ -77,6 +77,21 @@
   - apt: pkg=clamav
     tags:
       - antivirus
+  - apt: pkg=clamav-daemon
+    tags:
+      - antivirus
+  - template: src=templates/common/clamd.conf dest=/etc/clamav/clamd.conf
+    tags:
+      - antivirus
+  - template: src=templates/common/freshclam.conf dest=/etc/clamav/freshclam.conf
+    tags:
+      - antivirus
+  - cron: hour=2 job="/usr/bin/freshclam >/dev/null" minute=0 name="ClamAV"
+    tags:
+      - antivirus
+  - service: name=clamav-daemon state=restarted
+    tags:
+      - antivirus
 
 
 - hosts: auth_servers
