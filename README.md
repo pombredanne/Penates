@@ -62,14 +62,14 @@ Step 1
   * [OK] get self certificate
   * [OK] pkinit : kinit -X "X509_user_identity=FILE:${cert}" ${principal}  ; kinit -C FILE:${cert} ${principal}
   * [OK] tests pour chaque étape
-  * DANE
-  * DNSSEC
+  * [OK] DANE
+  * [OK] DNSSEC
   * SMTP
     * [OK] système (sans auth mais local uniquement)
     * [OK] utilisateur (ldap)
     * [OK] spamassassin
-    * dkim
-    * spf
+    * [OK] dkim
+    * [OK] spf
     * clamav
     * utilisateur (kerberos)
     
@@ -81,16 +81,18 @@ Step 1
   * [OK] revoke certificate
   * [OK] sudo for admins
   * [OK] LDAP autz on machines (netgroups)
+  * utiliser DNSSEC
+  * racines DNSSEC
 
 Step 2
 ------
 
+  * logging
   * ISO generation
   * TFTP server + ISO mirror
   * ubuntu mirror
   * moneta mirror
   * supervision
-  * logging
   * remove machine
   * remove service
   * disable user

@@ -9,10 +9,11 @@
   - template: src=templates/mail_servers/amavis_99-local.conf dest=/etc/amavis/conf.d/99-local owner=root group=root mode=0644
   - apt: pkg=spamassassin
   - template: src=templates/mail_servers/mailname.txt dest=/etc/mailname owner=root group=root mode=0644
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/dkim/{{ mail_fqdn }}/10026/"
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/amavis/cert.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/dkim/{{ mail_fqdn }}/10026/"
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/dkim/{{ mail_fqdn }}/10026/?role=Service1024"
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/amavis/cert.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/dkim/{{ mail_fqdn }}/10026/?role=Service1024"
   - command: "openssl rsa -in /etc/amavis/cert.pem -out /etc/amavis/dkim.pem"
   - service: state=restarted name=amavis
+  - command: "amavisd-new testkey"
 
   - apt: pkg=dovecot-imapd
   - apt: pkg=dovecot-lmtpd

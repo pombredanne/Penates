@@ -74,6 +74,11 @@
     tags:
       - authent
 
+  - apt: pkg=clamav
+    tags:
+      - antivirus
+
+
 - hosts: auth_servers
   remote_user: root
   tasks:
