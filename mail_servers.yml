@@ -36,21 +36,13 @@
   - ufw: rule=allow port=993 proto=tcp
   - service: state=restarted name=dovecot
 
-  - apt: pkg=clamsmtp
-  - template: src=templates/mail_servers/clamsmtpd-in.conf dest=/etc/clamav/clamsmtpd-in.conf owner=root group=root mode=0644
-  - template: src=templates/mail_servers/clamsmtpd-in-systemd.service dest=/etc/systemd/system/clamsmtpd-in.service
-  - command: systemctl enable clamsmtpd-in.service
-  - service: name=clamsmtpd-in state=restarted
-  - template: src=templates/mail_servers/clamsmtpd-out.conf dest=/etc/clamsmtpd.conf owner=root group=root mode=0644
-  - service: name=clamsmtpd state=restarted
-
-
   - apt: pkg=opensmtpd
   - file: path=/etc/opensmtpd state=directory
   - template: src=templates/mail_servers/aliases dest=/etc/opensmtpd/aliases owner=root group=root mode=0644
   - template: src=templates/mail_servers/smarthost dest=/etc/opensmtpd/smarthost owner=root group=root mode=0644
   - template: src=templates/mail_servers/dovecot.conf dest=/etc/dovecot/dovecot.conf owner=root group=root mode=0644
   - template: src=templates/mail_servers/mailname dest=/etc/mail/mailname owner=root group=root mode=0644
+  - template: src=templates/mail_servers/smtpd.conf dest=/etc/smtpd.conf owner=root group=root mode=0644
   - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/smtp/{{ mail_fqdn }}/25/?keytab=smtp"
   - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/smtp/{{ mail_fqdn }}/465/"
   - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/smtp/{{ mail_fqdn }}/587/"
