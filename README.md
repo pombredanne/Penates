@@ -88,6 +88,9 @@ Step 2
 ------
 
   * logging
+    * centralization
+    * >= warning
+    * logrotate
   * supervision
   * ISO generation
   * TFTP server + ISO mirror

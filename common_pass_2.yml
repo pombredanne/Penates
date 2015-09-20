@@ -95,7 +95,19 @@
   - apt: pkg=rsyslog
     tags:
       - syslog
-  - template: src=templates/common/90-penates-rsyslog.conf dest=/etc/rsyslog.d/90-penates-rsyslog.conf
+  - apt: pkg=rsyslog-gnutls
+    tags:
+      - syslog
+  - file: path=/var/log/local/ state=directory owner=syslog group=adm
+    tags:
+      - syslog
+  - template: src=templates/common/rsyslog.d/20-ufw.conf dest=/etc/rsyslog.d/20-ufw.conf
+    tags:
+      - syslog
+  - template: src=templates/common/rsyslog.d/50-default.conf dest=/etc/rsyslog.d/50-default.conf
+    tags:
+      - syslog
+  - template: src=templates/common/rsyslog.d/90-penates.conf dest=/etc/rsyslog.d/90-penates.conf
     tags:
       - syslog
   - service: name=rsyslog state=restarted
