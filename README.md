@@ -44,8 +44,8 @@ Processes
     * create certificate (email, authent)
     * create ssh public key
     * create private key
-    
-    
+
+
 TODO
 ====
 
@@ -70,7 +70,7 @@ Step 1
     * [OK] spamassassin
     * [OK] dkim
     * [OK] spf
-    * [OK] clamav
+    * clamav
     * utilisateur (kerberos)
     
   * [OK] IMAP4
@@ -82,17 +82,17 @@ Step 1
   * [OK] sudo for admins
   * [OK] LDAP autz on machines (netgroups)
   * utiliser DNSSEC
-  * racines DNSSEC
+  * external DNS config
 
 Step 2
 ------
 
   * logging
+  * supervision
   * ISO generation
   * TFTP server + ISO mirror
   * ubuntu mirror
   * moneta mirror
-  * supervision
   * remove machine
   * remove service
   * disable user

@@ -92,6 +92,15 @@
   - service: name=clamav-daemon state=restarted
     tags:
       - antivirus
+  - apt: pkg=rsyslog
+    tags:
+      - syslog
+  - template: src=templates/common/90-penates-rsyslog.conf dest=/etc/rsyslog.d/90-penates-rsyslog.conf
+    tags:
+      - syslog
+  - service: name=rsyslog state=restarted
+    tags:
+      - syslog
 
 
 - hosts: auth_servers
