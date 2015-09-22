@@ -87,12 +87,18 @@ Step 1
 Step 2
 ------
 
-  * logging
+  * fail2ban
+  * [OK] logging
+    * [OK] centralization
+    * [OK] >= warning
+    * [OK] logrotate
+  * journald
     * centralization
-    * >= warning
+    * warning
     * logrotate
-  * supervision
+  * rkhunter
   * ISO generation
+  * supervision
   * TFTP server + ISO mirror
   * ubuntu mirror
   * moneta mirror

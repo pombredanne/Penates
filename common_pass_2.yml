@@ -113,17 +113,29 @@
   - service: name=rsyslog state=restarted
     tags:
       - syslog
+  - apt: pkg=fail2ban
+    tags:
+      - fail2ban
+  - template: src=templates/common/fail2ban.conf dest=/etc/fail2ban/jail.local
+    tags:
+      - fail2ban
+  - service: name=fail2ban state=restarted
+    tags:
+      - fail2ban
 
 
 - hosts: auth_servers
   remote_user: root
   tasks:
+  - file: path=/etc/dhcp/ state=directory
+    tags:
+      - dhcp
   - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : -o /etc/dhcp/dhcpd.conf https://{{ penates_directory_fqdn }}/auth/conf/dhcpd.conf"
     tags:
       - dhcp
-  - service: name=isc-dhcp-server state=restarted
+  - service: name=pdns-recursor state=restarted
     tags:
       - dhcp
-  - service: name=pdns-recursor state=restarted
+  - service: name=isc-dhcp-server state=restarted
     tags:
       - dhcp
