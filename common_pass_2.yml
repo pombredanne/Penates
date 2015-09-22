@@ -113,6 +113,9 @@
   - service: name=rsyslog state=restarted
     tags:
       - syslog
+  - apt: pkg=python-pyinotify
+    tags:
+      - fail2ban
   - apt: pkg=fail2ban
     tags:
       - fail2ban
@@ -124,7 +127,7 @@
       - fail2ban
 
 
-- hosts: auth_servers
+- hosts: dhcp_servers
   remote_user: root
   tasks:
   - file: path=/etc/dhcp/ state=directory
@@ -133,9 +136,20 @@
   - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : -o /etc/dhcp/dhcpd.conf https://{{ penates_directory_fqdn }}/auth/conf/dhcpd.conf"
     tags:
       - dhcp
-  - service: name=pdns-recursor state=restarted
+  - apt: pkg=isc-dhcp-server
     tags:
       - dhcp
   - service: name=isc-dhcp-server state=restarted
+    tags:
+      - dhcp
+  - service: name=isc-dhcp-server6 state=restarted
+    tags:
+      - dhcp
+
+
+- hosts: auth_servers
+  remote_user: root
+  tasks:
+  - service: name=pdns-recursor state=restarted
     tags:
       - dhcp

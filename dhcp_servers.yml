@@ -27,8 +27,7 @@
   - service: name=isc-dhcp-server state=restarted
     tags:
       - dhcp
-  - name: restart isc-dhcpd6
-    service: name=isc-dhcp-server6 state=restarted
+  - service: name=isc-dhcp-server6 state=restarted
     tags:
       - dhcp
   - ufw: rule=allow port=67 proto=udp
