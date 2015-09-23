@@ -26,3 +26,15 @@
     command: c_rehash /etc/ssl/certs
   - name: Update CA certificates (2/2)
     command: update-ca-certificates
+  - apt: pkg=rsyslog
+  - apt: pkg=rsyslog-gnutls
+  - file: path=/var/log/local/auth.log state=touch owner=syslog group=adm
+  - file: path=/var/log/local/ state=directory owner=syslog group=adm
+  - template: src=templates/common/rsyslog.d/20-ufw.conf dest=/etc/rsyslog.d/20-ufw.conf
+  - template: src=templates/common/rsyslog.d/50-default.conf dest=/etc/rsyslog.d/50-default.conf
+  - template: src=templates/common/rsyslog.d/90-penates.conf dest=/etc/rsyslog.d/90-penates.conf
+  - service: name=rsyslog state=restarted
+  - apt: pkg=python-pyinotify
+  - apt: pkg=fail2ban
+  - template: src=templates/common/fail2ban.conf dest=/etc/fail2ban/jail.local
+  - service: name=fail2ban state=restarted

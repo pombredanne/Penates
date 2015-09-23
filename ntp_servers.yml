@@ -1,0 +1,11 @@
+---
+
+- hosts: ntp_servers
+  remote_user: root
+  vars:
+    ntp_fqdn: "ntp{{ inventory_hostname|indexed_fqdn(groups['ntp_servers']) }}.{{ penates_domain }}"
+  tasks:
+  - apt: pkg=ntp
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/ntp/{{ log_fqdn }}/514/"
+  - service: name=ntp state=restarted
+  - ufw: rule=allow port=123 proto=udp

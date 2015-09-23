@@ -2,7 +2,7 @@
 - hosts: mail_servers
   remote_user: root
   vars:
-    mail_fqdn: "mail{{ '%02d' % (groups['auth_servers'].index(inventory_hostname) + 1) }}.{{ penates_domain }}"
+    mail_fqdn: "mail{{ inventory_hostname|indexed_fqdn(groups['mail_servers']) }}.{{ penates_domain }}"
   tasks:
   - apt: pkg=amavisd-new
   - template: src=templates/mail_servers/amavis_05-node_id.conf dest=/etc/amavis/conf.d/05-node_id owner=root group=root mode=0644
@@ -59,3 +59,6 @@
   - ufw: rule=allow port=25 proto=tcp
   - ufw: rule=allow port=465 proto=tcp
   - ufw: rule=allow port=587 proto=tcp
+
+  - template: src=templates/mail_servers/jail.conf dest=/etc/fail2ban/jail.d/mail_servers.conf
+  - service: name=fail2ban state=reloaded

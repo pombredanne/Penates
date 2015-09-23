@@ -88,6 +88,11 @@ Step 2
 ------
 
   * fail2ban
+    * [OK] ssh
+    * [OK] dovecot
+    * opensmtpd
+    * postgresql
+    * kerberos
   * [OK] logging
     * [OK] centralization
     * [OK] >= warning
@@ -125,17 +130,19 @@ Step 5
 
   * Gitlab
   * Maven
+  * Jenkins
   * Readthedocs
   * Updoc
   * Vagrant mirror
-  * SIP
   * CardDAV, CalDAV
   * pypi mirror
+  * SIP
   
 Step 6
 ------
 
-  * infrastucture secondaire (LDAP, Kerberos, DNS+Postgres, DHCP, NTP, SMTP, Log)
+  * infrastucture secondaire (LDAP, Kerberos, DNS+Postgres, DHCP, NTP, SMTP)
+  * analyse de logs
   
 Step 7
 ------

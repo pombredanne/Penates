@@ -3,7 +3,7 @@
 - hosts: log_servers
   remote_user: root
   vars:
-    log_fqdn: "log{{ '%02d' % (groups['log_servers'].index(inventory_hostname) + 1) }}.{{ penates_domain }}"
+    log_fqdn: "log{{ inventory_hostname|indexed_fqdn(groups['log_servers']) }}.{{ penates_domain }}"
   tasks:
   - apt: pkg=rsyslog
   - apt: pkg=rsyslog-gnutls

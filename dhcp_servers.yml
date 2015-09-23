@@ -2,7 +2,7 @@
 - hosts: dhcp_servers
   remote_user: root
   vars:
-    dhcp_fqdn: "dhcp{{ '%02d' % (groups['dhcp_servers'].index(inventory_hostname) + 1) }}.{{ penates_domain }}"
+    dhcp_fqdn: "dhcp{{ inventory_hostname|indexed_fqdn(groups['dhcp_servers']) }}.{{ penates_domain }}"
   tasks:
 
   - apt: pkg=dhcping

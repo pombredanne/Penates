@@ -115,6 +115,14 @@ def slugify(value):
     return re.sub('[-\s]+', '-', value)
 
 
+def indexed_fqdn(value, host_list):
+    """
+    >>> indexed_fqdn('host_1', ['host_0', 'host_1', 'host_2']) == '02'
+    True
+    """
+    return '%02d' % (host_list.index(value) + 1)
+
+
 class FilterModule(object):
     # noinspection PyMethodMayBeStatic
     def filters(self):
@@ -130,4 +138,5 @@ class FilterModule(object):
                 'reverse_subnet': reverse_subnet,
                 'subnet_version': subnet_version,
                 'slugify': slugify,
+                'indexed_fqdn': indexed_fqdn,
                 }

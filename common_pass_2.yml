@@ -92,51 +92,15 @@
   - service: name=clamav-daemon state=restarted
     tags:
       - antivirus
-  - apt: pkg=rsyslog
-    tags:
-      - syslog
-  - apt: pkg=rsyslog-gnutls
-    tags:
-      - syslog
-  - file: path=/var/log/local/ state=directory owner=syslog group=adm
-    tags:
-      - syslog
-  - template: src=templates/common/rsyslog.d/20-ufw.conf dest=/etc/rsyslog.d/20-ufw.conf
-    tags:
-      - syslog
-  - template: src=templates/common/rsyslog.d/50-default.conf dest=/etc/rsyslog.d/50-default.conf
-    tags:
-      - syslog
-  - template: src=templates/common/rsyslog.d/90-penates.conf dest=/etc/rsyslog.d/90-penates.conf
-    tags:
-      - syslog
-  - service: name=rsyslog state=restarted
-    tags:
-      - syslog
-  - apt: pkg=python-pyinotify
-    tags:
-      - fail2ban
-  - apt: pkg=fail2ban
-    tags:
-      - fail2ban
-  - template: src=templates/common/fail2ban.conf dest=/etc/fail2ban/jail.local
-    tags:
-      - fail2ban
-  - service: name=fail2ban state=restarted
-    tags:
-      - fail2ban
 
 
 - hosts: dhcp_servers
   remote_user: root
   tasks:
-  - file: path=/etc/dhcp/ state=directory
+  - apt: pkg=isc-dhcp-server
     tags:
       - dhcp
   - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : -o /etc/dhcp/dhcpd.conf https://{{ penates_directory_fqdn }}/auth/conf/dhcpd.conf"
-    tags:
-      - dhcp
-  - apt: pkg=isc-dhcp-server
     tags:
       - dhcp
   - service: name=isc-dhcp-server state=restarted
