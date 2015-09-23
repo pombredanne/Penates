@@ -172,6 +172,12 @@
     copy: src=files/auth_servers/kerberos.ldif dest=/etc/ldap/schema/kerberos.ldif
     tags:
       - kerberos
+      - ldap
+  - name: copy kerberos.ldif
+    copy: src=files/auth_servers/asterisk.ldif dest=/etc/ldap/schema/asterisk.ldif
+    tags:
+      - ldap
+      - asterisk
   - name: copy samba.ldif
     copy: src=files/auth_servers/samba.ldif dest=/etc/ldap/schema/samba.ldif
     tags:
@@ -210,6 +216,10 @@
       - ldap
   - name: import kerberos.ldif
     shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/kerberos.ldif | true
+    tags:
+      - ldap
+  - name: import asterisk.ldif
+    shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/asterisk.ldif | true
     tags:
       - ldap
   - name: import samba.ldif
