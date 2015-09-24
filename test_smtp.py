@@ -16,7 +16,6 @@ def main():
     smtp.set_debuglevel(1)
     smtp.starttls()
     smtp.sendmail(from_email, [to_email], 'test message')
-    return
 
     smtp = smtplib.SMTP(hostname, 587)
     smtp.set_debuglevel(0)

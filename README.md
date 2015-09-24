@@ -55,6 +55,7 @@ Step 1
   * [OK] IP fixe
   * [OK] set machine keytab/certificate/rsa ssh key
   * [OK] NTP
+    * crypto authentication
   * [OK] A/AAAA external records
   * [OK] user creation
   * [OK] group creation
@@ -91,7 +92,6 @@ Step 2
     * [OK] ssh
     * [OK] dovecot
     * opensmtpd
-    * postgresql
     * kerberos
   * [OK] logging
     * [OK] centralization
@@ -103,6 +103,7 @@ Step 2
     * logrotate
   * rkhunter
   * ISO generation
+  * CA generation
   * supervision
   * TFTP server + ISO mirror
   * ubuntu mirror
@@ -110,6 +111,9 @@ Step 2
   * remove machine
   * remove service
   * disable user
+
+ca_cert.pem, ca_key, root_ssh_key
+
 
 Step 3
 ------
@@ -141,7 +145,7 @@ Step 5
 Step 6
 ------
 
-  * infrastucture secondaire (LDAP, Kerberos, DNS+Postgres, DHCP, NTP, SMTP)
+  * infrastucture secondaire (LDAP, Kerberos, DNS, DHCP, NTP, SMTP)
   * analyse de logs
   
 Step 7
