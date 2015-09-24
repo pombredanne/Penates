@@ -6,30 +6,23 @@
     tmp_mount_point: "cache/src_iso"
     iso_content: "cache/src_iso_content"
   tasks:
+  - apt: pkg=genisoimage
   - file: path=cache state=directory
-  - file: path="{{ tmp_mount_point }}" state=absent
+  - command: "sudo rm -rf {{ tmp_mount_point }} {{ iso_content }}"
   - file: path="{{ tmp_mount_point}}" state=directory
-  - file: path="{{ iso_content }}" state=absent
   - file: path="{{ iso_content }}" state=directory
   - file: path="{{ penates_organization }}" state=absent
   - command: "sudo mount -o ro,loop {{ src_iso }} {{ tmp_mount_point }}"
   - command: "sudo cp -rT {{ tmp_mount_point }} {{ iso_content }}"
   - command: "sudo umount {{ tmp_mount_point }}"
   - file: path="{{ tmp_mount_point }}" state=absent
-  - template: src=generate_iso/txt.cfg dst="{{ iso_content }}/isolinux/txt.cfg"
-  - template: src=generate_iso/ubuntu.seed dst="{{ iso_content }}/preseed/ubuntu-server.seed"
-  - template: src=generate_iso/lang dst="{{ iso_content }}/isolinux/lang"
-  - file: path="{{ iso_content }}/md5sum.txt" state=absent
+  - command: "sudo chmod 777 {{ iso_content }}/isolinux/txt.cfg {{ iso_content }}/preseed {{ iso_content }}/preseed/ubuntu-server.seed {{ iso_content }}/isolinux"
+  - command: "sudo rm {{ iso_content }}/md5sum.txt"
+  - template: src=templates/generate_iso/txt.cfg dest="{{ iso_content }}/isolinux/txt.cfg"
+  - template: src=templates/generate_iso/ubuntu.seed dest="{{ iso_content }}/preseed/ubuntu-server.seed"
+  - template: src=templates/generate_iso/lang dest="{{ iso_content }}/isolinux/lang"
   - shell: find -type f -print0 | sudo xargs -0 md5sum | grep -v isolinux/boot.cat | sudo tee md5sum.txt > /dev/null
     args:
       chdir: "{{ iso_content }}"
   - shell:  sudo mkisofs -D -r -V "{{ penates_organization }}" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o {{ dst_iso }} {{ iso_content }} 2> /dev/null
-    args:
-      chdir: "{{ iso_content }}"
-
-
-#  - file: path={{ dst_iso }}
-#WHOAMI=`whoami`
-#sudo chown ${WHOAMI} ${DST_ISO}
-#sudo rm -rf ${ISO_CONTENT}
-#echo "Youpi !"
+  - command: "sudo rm -rf {{ iso_content }}"
