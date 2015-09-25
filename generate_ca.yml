@@ -1,5 +1,14 @@
 ---
 - hosts: generate_iso
   vars:
+    ca_key_path: private/ca_key.pem
+    ca_crt_path: private/ca_crt.pem
+    ca_req_path: private/ca_req.pem
+    ssh_key_path: private/id_rsa
   tasks:
-  -
+  - file: path=private state=directory
+  - command: "openssl genrsa -out {{ ca_key_path }} 4096"
+  - template: src=templates/generate_ca/openssl.conf dest=cache/openssl.conf
+  - command: "openssl req  -out {{ ca_req_path }} -batch -utf8 -new -key {{ ca_key_path }} -sha256 -config cache/openssl.conf -extensions role_req"
+  - command: "openssl x509 -in {{ ca_req_path }} -out {{ ca_crt_path }} -req -signkey {{ ca_key_path }} -days 8000 -extensions role_req -extfile cache/openssl.conf  -sha256"
+  - command: "ssh-keygen -b 4096 -C admin@{{ penates_domain }} -t rsa -N '' -f {{ ssh_key_path }}"

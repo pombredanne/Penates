@@ -119,10 +119,6 @@ Step 2
   * disable user
 
 
-
-ca_cert.pem, ca_key, root_ssh_key
-
-
 Step 3
 ------
 

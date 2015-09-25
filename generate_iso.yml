@@ -1,12 +1,15 @@
 ---
 - hosts: generate_iso
   vars:
-    src_iso: "cache/ubuntu-15.04-server-amd64.iso"
-    dst_iso: "cache/ubuntu-15.04-penates-amd64.iso"
+    src_iso: "cache/ubuntu-server-amd64.iso"
+    dst_iso: "cache/ubuntu-penates-amd64.iso"
     tmp_mount_point: "cache/src_iso"
     iso_content: "cache/src_iso_content"
+    ssh_pub_path: private/id_rsa.pub
   tasks:
-  - apt: pkg=genisoimage
+  - command: sudo apt-get install genisoimage
+  - command: "cat {{ ssh_pub_path }}"
+    register: root_ssh_pub_key
   - file: path=cache state=directory
   - stat: path="{{ src_iso }}"
     register: src_iso_exists

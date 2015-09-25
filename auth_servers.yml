@@ -98,10 +98,10 @@
   - file: path=/etc/penatesserver/ state=directory owner=penatesserver
     tags:
       - penatesserver
-  - copy: src=files/auth_servers/ca_cert.pem dest=/var/penatesserver/data/pki/cacert.pem owner=penatesserver mode=0644 group=penatesserver
+  - copy: src=private/ca_crt.pem dest=/var/penatesserver/data/pki/cacert.pem owner=penatesserver mode=0644 group=penatesserver
     tags:
       - penatesserver
-  - copy: src=files/auth_servers/ca_key.pem dest=/var/penatesserver/data/pki/private/cakey.pem owner=penatesserver mode=0600 group=penatesserver
+  - copy: src=private/ca_key.pem dest=/var/penatesserver/data/pki/private/cakey.pem owner=penatesserver mode=0600 group=penatesserver
     tags:
       - penatesserver
   - postgresql_user: name=penatesserver password={{ penatesserver_password }} role_attr_flags=NOSUPERUSER
