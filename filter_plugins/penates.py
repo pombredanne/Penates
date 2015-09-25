@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import random
 import re
+import crypt
 import netaddr
 import unicodedata
 
@@ -123,6 +125,21 @@ def indexed_fqdn(value, host_list):
     return '%02d' % (host_list.index(value) + 1)
 
 
+def generate_salt():
+    salt_set = ('abcdefghijklmnopqrstuvwxyz'
+                'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+                '0123456789./')
+    salt = 16 * ' '
+    return ''.join([random.choice(salt_set) for c in salt])
+
+
+def mkpasswd(passwd, algo='SHA-256'):
+    algos = {'SHA-512': '$6$', 'SHA-256': '$5$', 'MD5': '$1$', 'DES': ''}
+    salt = generate_salt()
+    result = crypt.crypt(passwd, algos[algo] + salt)
+    return result
+
+
 class FilterModule(object):
     # noinspection PyMethodMayBeStatic
     def filters(self):
@@ -139,4 +156,5 @@ class FilterModule(object):
                 'subnet_version': subnet_version,
                 'slugify': slugify,
                 'indexed_fqdn': indexed_fqdn,
+                'mkpasswd': mkpasswd,
                 }

@@ -1,0 +1,5 @@
+---
+- hosts: generate_iso
+  vars:
+  tasks:
+  -

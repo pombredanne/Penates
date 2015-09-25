@@ -103,6 +103,12 @@ Step 2
     * logrotate
   * rkhunter
   * ISO generation
+    * login
+    * name
+    * password1
+    * password2
+    * encrypt home
+    * configure LVM?
   * CA generation
   * supervision
   * TFTP server + ISO mirror
@@ -111,6 +117,8 @@ Step 2
   * remove machine
   * remove service
   * disable user
+
+
 
 ca_cert.pem, ca_key, root_ssh_key
 

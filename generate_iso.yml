@@ -8,6 +8,10 @@
   tasks:
   - apt: pkg=genisoimage
   - file: path=cache state=directory
+  - stat: path="{{ src_iso }}"
+    register: src_iso_exists
+  - command: "curl -o {{ src_iso }} {{ download_link }}"
+    when: src_iso_exists.stat.exists == False
   - command: "sudo rm -rf {{ tmp_mount_point }} {{ iso_content }}"
   - file: path="{{ tmp_mount_point}}" state=directory
   - file: path="{{ iso_content }}" state=directory
