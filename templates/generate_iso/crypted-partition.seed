@@ -1,0 +1,1 @@
+{% include 'templates/generate_iso/base.seed' %}

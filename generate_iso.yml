@@ -28,7 +28,7 @@
   - copy: src=files/generate_iso/back_640x480.png dest={{ iso_content}}/isolinux/back.png
   - template: src=templates/generate_iso/txt.cfg dest="{{ iso_content }}/isolinux/txt.cfg"
   - template: src=templates/generate_iso/isolinux.cfg dest="{{ iso_content }}/isolinux/isolinux.cfg"
-  - template: src=templates/generate_iso/ubuntu.seed dest="{{ iso_content }}/preseed/ubuntu-server.seed"
+  - template: src=templates/generate_iso/partition.seed dest="{{ iso_content }}/preseed/ubuntu-server.seed"
   - shell: find -type f -print0 | sudo xargs -0 md5sum | grep -v isolinux/boot.cat | sudo tee md5sum.txt > /dev/null
     args:
       chdir: "{{ iso_content }}"
