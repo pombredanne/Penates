@@ -23,11 +23,15 @@
   - command: "sudo cp -rT {{ tmp_mount_point }} {{ iso_content }}"
   - command: "sudo umount {{ tmp_mount_point }}"
   - file: path="{{ tmp_mount_point }}" state=absent
-  - command: "sudo chmod 777 {{ iso_content }}/isolinux/txt.cfg {{ iso_content }}/preseed {{ iso_content }}/preseed/ubuntu-server.seed {{ iso_content }}/isolinux"
+  - command: "sudo chmod 777 {{ iso_content }}/isolinux/txt.cfg {{ iso_content }}/preseed {{ iso_content }}/preseed/ubuntu-server.seed {{ iso_content }}/isolinux {{ iso_content }}/isolinux/langlist"
   - command: "sudo rm {{ iso_content }}/md5sum.txt"
   - template: src=templates/generate_iso/txt.cfg dest="{{ iso_content }}/isolinux/txt.cfg"
+  - template: src=templates/generate_iso/isolinux.cfg dest="{{ iso_content }}/isolinux/isolinux.cfg"
   - template: src=templates/generate_iso/ubuntu.seed dest="{{ iso_content }}/preseed/ubuntu-server.seed"
-  - template: src=templates/generate_iso/lang dest="{{ iso_content }}/isolinux/lang"
+#  - template: src=templates/generate_iso/gfxboot.cfg dest="{{ iso_content }}/isolinux/gfxboot.cfg"
+#  - template: src=templates/generate_iso/menu.cfg dest="{{ iso_content }}/isolinux/menu.cfg"
+#  - template: src=templates/generate_iso/stdmenu.cfg dest="{{ iso_content }}/isolinux/stdmenu.cfg"
+#  - template: src=templates/generate_iso/lang dest="{{ iso_content }}/isolinux/lang" mode=0644
   - shell: find -type f -print0 | sudo xargs -0 md5sum | grep -v isolinux/boot.cat | sudo tee md5sum.txt > /dev/null
     args:
       chdir: "{{ iso_content }}"
