@@ -6,6 +6,8 @@
     sup_fqdn: "sup{{ inventory_hostname|indexed_fqdn(groups['supervision_servers']) }}.{{ penates_domain }}"
     sup_sqdn: "sup{{ inventory_hostname|indexed_fqdn(groups['supervision_servers']) }}"
   tasks:
+  - command: hostname
+    register: actual_hostname
   - apt: pkg=shinken-mod-pickle-retention-file-generic
   - apt: pkg=shinken-mod-webui
   - apt: pkg=shinken-core
@@ -15,33 +17,44 @@
 
 
   - template: src=templates/supervision_servers/schedulers/scheduler.cfg dest=/etc/shinken/schedulers/scheduler.cfg mode=0644
-  - template: src=templates/supervision_servers/daemons/schedulerd.ini dest=/etc/shinken/dameons/schedulerd.ini mode=0644
+  - template: src=templates/supervision_servers/daemons/schedulerd.ini dest=/etc/shinken/daemons/schedulerd.ini mode=0644
   - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/https/{{ sup_fqdn }}/7768/"
   - ufw: rule=allow port=7768 proto=tcp
 
   - template: src=templates/supervision_servers/reactionners/reactionner.cfg dest=/etc/shinken/reactionners/reactionner.cfg mode=0644
-  - template: src=templates/supervision_servers/daemons/reactionnerd.ini dest=/etc/shinken/dameons/reactionnerd.ini mode=0644
+  - template: src=templates/supervision_servers/daemons/reactionnerd.ini dest=/etc/shinken/daemons/reactionnerd.ini mode=0644
   - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/https/{{ sup_fqdn }}/7769/"
   - ufw: rule=allow port=7769 proto=tcp
 
-  - template: src=arbiters/arbiter.cfg dest=/etc/shinken/arbiters/arbiter.cfg mode=0644
+  - template: src=templates/supervision_servers/arbiters/arbiter.cfg dest=/etc/shinken/arbiters/arbiter.cfg mode=0644
   - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/https/{{ sup_fqdn }}/7770/"
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/rshinken/shinken.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/https/{{ sup_fqdn }}/7770/"
-  - command: "openssl x509 -in /etc/rshinken/shinken.pem -out /etc/rshinken/shinken.crt"
-  - command: "openssl rsa -in /etc/rshinken/shinken.pem -out /etc/rshinken/shinken.key"
   - ufw: rule=allow port=7770 proto=tcp
 
   - template: src=templates/supervision_servers/pollers/poller.cfg dest=/etc/shinken/pollers/poller.cfg mode=0644
-  - template: src=templates/supervision_servers/daemons/pollerd.ini dest=/etc/shinken/dameons/pollerd.ini mode=0644
+  - template: src=templates/supervision_servers/daemons/pollerd.ini dest=/etc/shinken/daemons/pollerd.ini mode=0644
   - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/https/{{ sup_fqdn }}/7771/"
   - ufw: rule=allow port=7771 proto=tcp
 
   - template: src=templates/supervision_servers/brokers/broker.cfg dest=/etc/shinken/brokers/broker.cfg mode=0644
-  - template: src=templates/supervision_servers/daemons/brokerd.ini dest=/etc/shinken/dameons/brokerd.ini mode=0644
+  - template: src=templates/supervision_servers/daemons/brokerd.ini dest=/etc/shinken/daemons/brokerd.ini mode=0644
   - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/https/{{ sup_fqdn }}/7772/"
   - ufw: rule=allow port=7772 proto=tcp
 
   - template: src=templates/supervision_servers/receivers/receiver.cfg dest=/etc/shinken/receivers/receiver.cfg mode=0644
-  - template: src=templates/supervision_servers/daemons/receiverd.ini dest=/etc/shinken/dameons/receiverd.ini mode=0644
+  - template: src=templates/supervision_servers/daemons/receiverd.ini dest=/etc/shinken/daemons/receiverd.ini mode=0644
   - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/https/{{ sup_fqdn }}/7773/"
   - ufw: rule=allow port=7773 proto=tcp
+
+  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/shinken/shinken.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/https/{{ sup_fqdn }}/7770/"
+  - command: "openssl x509 -in /etc/shinken/shinken.pem -out /etc/shinken/shinken.crt"
+  - command: "openssl rsa -in /etc/shinken/shinken.pem -out /etc/shinken/shinken.key"
+  - file: path=/etc/shinken/shinken.pem mode=0400
+  - file: path=/etc/shinken/shinken.key mode=0400
+
+  - service: name=shinken-arbiter state=restarted
+  - service: name=shinken-broker state=restarted
+  - service: name=shinken-poller state=restarted
+  - service: name=shinken-reactionner state=restarted
+  - service: name=shinken-receiver state=restarted
+  - service: name=shinken-scheduler state=restarted
+  - service: name=shinken state=restarted
