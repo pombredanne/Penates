@@ -102,15 +102,19 @@ Step 2
     * warning
     * logrotate
   * rkhunter
-  * ISO generation
-    * login
-    * name
-    * password1
-    * password2
-    * encrypt home
-    * configure LVM?
-  * CA generation
+  * [OK] ISO generation
+    * [OK] login
+    * [OK] name
+    * [OK] password1
+    * [OK] password2
+    * [OK] encrypt home
+    * [OK] configure LVM?
+  * [OK] CA generation
   * supervision
+    * shinken
+    * webui
+    * graphite
+    * mongodb ?
   * TFTP server + ISO mirror
   * ubuntu mirror
   * moneta mirror

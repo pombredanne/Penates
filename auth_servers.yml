@@ -1,6 +1,8 @@
 ---
 - hosts: auth_servers
   remote_user: root
+  vars:
+    auth_fqdn: "directory{{ inventory_hostname|indexed_fqdn(groups['auth_servers']) }}.{{ penates_domain }}"
   tasks:
   - name: set the hostname
     template: src=templates/auth_servers/hostname dest=/etc/hostname owner=root group=root mode=0644
@@ -195,7 +197,7 @@
     tags:
       - ldap
   - name: register LDAP service
-    command: penatesserver-manage service ldaps {{ penates_directory_fqdn }} 636 --fqdn {{ penates_directory_hostname }} --description "Main LDAP server" --cert /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.crt --key /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.key
+    command: penatesserver-manage service ldaps {{ auth_fqdn }} 636 --fqdn {{ penates_directory_hostname }} --description "Main LDAP server" --cert /etc/ldap/slapd.d/{{ auth_fqdn }}.crt --key /etc/ldap/slapd.d/{{ auth_fqdn }}.key
     tags:
       - ldap
   - name: copy OpenLDAP base content
@@ -250,7 +252,7 @@
   - lineinfile: dest=/etc/default/slapd regexp='SLAPD_SERVICES="ldap:/// ldapi:///"' line='SLAPD_SERVICES="ldap:/// ldapi:/// ldaps:///"'
     tags:
       - ldap
-  - file: path=/etc/ldap/slapd.d/{{ penates_directory_fqdn }}.key state=file owner=openldap mode=0400 group=openldap
+  - file: path=/etc/ldap/slapd.d/{{ auth_fqdn }}.key state=file owner=openldap mode=0400 group=openldap
     tags:
       - ldap
   - name: restart OpenLDAP
@@ -264,9 +266,9 @@
   - file: path=/etc/ldap/indexes.ldif state=absent
     tags:
       - ldap
-  - command: ldapsearch -x -H ldaps://{{ penates_directory_fqdn }}/
+  - command: ldapsearch -x -H ldaps://{{ auth_fqdn }}/
     name: test ldaps:// interface
-  - command: ldapsearch -x -H ldap://{{ penates_directory_fqdn }}/
+  - command: ldapsearch -x -H ldap://{{ auth_fqdn }}/
     name: test ldap:// interface
   - command: ldapsearch -x -H ldapi:///
     name: test ldapi:// interface
@@ -277,7 +279,7 @@
       - powerdns
       - ldap
   - name: register LDAP service
-    command: penatesserver-manage service ldaps {{ penates_directory_fqdn }} 636 --fqdn {{ penates_directory_hostname }} --description "Main LDAP server" --cert /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.crt --key /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.key
+    command: penatesserver-manage service ldaps {{ auth_fqdn }} 636 --fqdn {{ penates_directory_hostname }} --description "Main LDAP server" --cert /etc/ldap/slapd.d/{{ auth_fqdn }}.crt --key /etc/ldap/slapd.d/{{ auth_fqdn }}.key
     tags:
       - ldap
 
@@ -288,11 +290,11 @@
     tags:
       - kerberos
   - name: register Kerberos service
-    command: penatesserver-manage service krb {{ penates_directory_fqdn }} 88 --role "Kerberos DC" --fqdn {{ penates_directory_hostname }} --description "Main Kerberos server" --cert /var/lib/heimdal-kdc/{{ penates_directory_fqdn }}.crt --key /var/lib/heimdal-kdc/{{ penates_directory_fqdn }}.key --srv tcp/kerberos
+    command: penatesserver-manage service krb {{ auth_fqdn }} 88 --role "Kerberos DC" --fqdn {{ penates_directory_hostname }} --description "Main Kerberos server" --cert /var/lib/heimdal-kdc/{{ auth_fqdn }}.crt --key /var/lib/heimdal-kdc/{{ auth_fqdn }}.key --srv tcp/kerberos
     tags:
       - kerberos
   - name: register Kerberos UDP service
-    command: penatesserver-manage service krb {{ penates_directory_fqdn }} 88 --role "Kerberos DC" --fqdn {{ penates_directory_hostname }} --description "Main Kerberos server" --protocol udp --srv tcp/kerberos
+    command: penatesserver-manage service krb {{ auth_fqdn }} 88 --role "Kerberos DC" --fqdn {{ penates_directory_hostname }} --description "Main Kerberos server" --protocol udp --srv tcp/kerberos
     tags:
       - kerberos
   - name: copy Kerberos KDC configuration
@@ -373,7 +375,7 @@
     tags:
       - penatesserver
   - name: register HTTP service
-    command: penatesserver-manage service https {{ penates_directory_fqdn }} 443 --role "Service" --fqdn {{ penates_directory_hostname }} --description "Penates Webservices" --kerberos_service HTTP --keytab /etc/apache2/http.keytab --cert /etc/apache2/{{ penates_directory_fqdn }}.pem --key /etc/apache2/{{ penates_directory_fqdn }}.pem --ca /etc/apache2/{{ penates_directory_fqdn }}.pem
+    command: penatesserver-manage service https {{ auth_fqdn }} 443 --role "Service" --fqdn {{ penates_directory_hostname }} --description "Penates Webservices" --kerberos_service HTTP --keytab /etc/apache2/http.keytab --cert /etc/apache2/{{ auth_fqdn }}.pem --key /etc/apache2/{{ auth_fqdn }}.pem --ca /etc/apache2/{{ auth_fqdn }}.pem
     tags:
       - penatesserver
   - command: kinit -t /etc/apache2/http.keytab -k HTTP/{{ penates_directory_hostname }}@{{ penates_domain|upper }}
@@ -386,10 +388,10 @@
   - file: path=/etc/apache2/http.keytab state=file owner=www-data group=www-data mode=0600
     tags:
       - penatesserver
-  - file: path=/etc/apache2/{{ penates_directory_fqdn }}.pem state=file owner=www-data group=www-data mode=0600
+  - file: path=/etc/apache2/{{ auth_fqdn }}.pem state=file owner=www-data group=www-data mode=0600
     tags:
       - penatesserver
-  - template: src=templates/auth_servers/penatesserver.conf dest=/etc/apache2/sites-available/{{ penates_directory_fqdn }}.conf owner=www-data group=www-data mode=0644
+  - template: src=templates/auth_servers/penatesserver.conf dest=/etc/apache2/sites-available/{{ auth_fqdn }}.conf owner=www-data group=www-data mode=0644
     tags:
       - penatesserver
   - file: path=/etc/apache2/sites-enabled/000-default.conf state=absent
@@ -398,7 +400,7 @@
   - file: path=/etc/apache2/sites-enabled/000-default state=absent
     tags:
       - penatesserver
-  - file: path=/etc/apache2/sites-enabled/{{ penates_directory_fqdn }}.conf src=/etc/apache2/sites-available/{{ penates_directory_fqdn }}.conf state=link
+  - file: path=/etc/apache2/sites-enabled/{{ auth_fqdn }}.conf src=/etc/apache2/sites-available/{{ auth_fqdn }}.conf state=link
     tags:
       - penatesserver
   - name: copy penatesserver systemd configuration
@@ -446,7 +448,7 @@
     tags:
       - powerdns
   - name: register DNS service
-    command: penatesserver-manage service dns {{ penates_directory_fqdn }} 53 --role "Service" --fqdn {{ penates_directory_hostname }} --description "Main DNS server" --protocol udp
+    command: penatesserver-manage service dns {{ auth_fqdn }} 53 --role "Service" --fqdn {{ penates_directory_hostname }} --description "Main DNS server" --protocol udp
     tags:
       - powerdns
   - shell: "pdnssec secure-zone {{ penates_domain }} | true"

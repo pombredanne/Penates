@@ -4,10 +4,10 @@ replace: olcTLSCACertificateFile
 olcTLSCACertificateFile: /etc/ssl/certs/Penates_CA.pem
 -
 replace: olcTLSCertificateFile
-olcTLSCertificateFile: /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.crt
+olcTLSCertificateFile: /etc/ldap/slapd.d/{{ auth_fqdn }}.crt
 -
 replace: olcTLSCertificateKeyFile
-olcTLSCertificateKeyFile: /etc/ldap/slapd.d/{{ penates_directory_fqdn }}.key
+olcTLSCertificateKeyFile: /etc/ldap/slapd.d/{{ auth_fqdn }}.key
 
 # Database settings
 dn: olcDatabase={1}hdb,cn=config

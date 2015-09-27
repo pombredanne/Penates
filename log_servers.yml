@@ -1,5 +1,4 @@
 ---
-
 - hosts: log_servers
   remote_user: root
   vars:

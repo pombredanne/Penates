@@ -1,0 +1,10 @@
+---
+
+- hosts: log_servers
+  remote_user: root
+  vars:
+    sup_fqdn: "sup{{ inventory_hostname|indexed_fqdn(groups['supervision_servers']) }}.{{ penates_domain }}"
+  tasks:
+  - apt: pkg=shinken-mod-pickle-retention-file-generic
+  - apt: pkg=shinken-mod-webui
+  - apt: pkg=shinken-core
