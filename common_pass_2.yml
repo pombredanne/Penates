@@ -73,6 +73,25 @@
   - service: name=nscd state=restarted
     tags:
       - authent
+  - apt: pkg=snmp
+    tags:
+      - snmp
+  - apt: pkg=snmpd
+    tags:
+      - snmp
+  - template: src=templates/common/snmp/snmp.conf dest=/etc/snmp/snmp.conf
+    tags:
+      - snmp
+  - template: src=templates/common/snmp/snmpd.conf dest=/etc/snmp/snmpd.conf
+    tags:
+      - snmp
+  - template: src=templates/common/snmp/snmptrapd.conf dest=/etc/snmp/snmptrapd.conf
+    tags:
+      - snmp
+  - ufw: rule=allow port=161 proto=udp
+  - service: name=snmpd state=restarted
+    tags:
+      - snmp
 
   - apt: pkg=clamav
     tags:
@@ -117,3 +136,5 @@
   - service: name=pdns-recursor state=restarted
     tags:
       - dhcp
+    - stat: path=/etc/krb5.keytab
+    register: check_host_keytab

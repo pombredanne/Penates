@@ -97,6 +97,7 @@ Step 2
     * [OK] centralization
     * [OK] >= warning
     * [OK] logrotate
+  * snmpd
   * journald
     * centralization
     * warning
@@ -114,7 +115,7 @@ Step 2
     * shinken
     * webui
     * graphite
-    * mongodb ?
+    * snmp
   * TFTP server + ISO mirror
   * ubuntu mirror
   * moneta mirror

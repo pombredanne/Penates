@@ -197,7 +197,7 @@
     tags:
       - ldap
   - name: register LDAP service
-    command: penatesserver-manage service ldaps {{ auth_fqdn }} 636 --fqdn {{ penates_directory_hostname }} --description "Main LDAP server" --cert /etc/ldap/slapd.d/{{ auth_fqdn }}.crt --key /etc/ldap/slapd.d/{{ auth_fqdn }}.key
+    command: penatesserver-manage service ldaps {{ auth_fqdn }} 636 --fqdn {{ penates_directory_hostname }} --description "Main LDAP server" --cert /etc/ldap/slapd.d/{{ auth_fqdn }}.crt --key /etc/ldap/slapd.d/{{ auth_fqdn }}.key --encryption=tls
     tags:
       - ldap
   - name: copy OpenLDAP base content
@@ -279,7 +279,7 @@
       - powerdns
       - ldap
   - name: register LDAP service
-    command: penatesserver-manage service ldaps {{ auth_fqdn }} 636 --fqdn {{ penates_directory_hostname }} --description "Main LDAP server" --cert /etc/ldap/slapd.d/{{ auth_fqdn }}.crt --key /etc/ldap/slapd.d/{{ auth_fqdn }}.key
+    command: penatesserver-manage service ldaps {{ auth_fqdn }} 636 --fqdn {{ penates_directory_hostname }} --description "Main LDAP server" --cert /etc/ldap/slapd.d/{{ auth_fqdn }}.crt --key /etc/ldap/slapd.d/{{ auth_fqdn }}.key --encryption=tls
     tags:
       - ldap
 
@@ -375,7 +375,7 @@
     tags:
       - penatesserver
   - name: register HTTP service
-    command: penatesserver-manage service https {{ auth_fqdn }} 443 --role "Service" --fqdn {{ penates_directory_hostname }} --description "Penates Webservices" --kerberos_service HTTP --keytab /etc/apache2/http.keytab --cert /etc/apache2/{{ auth_fqdn }}.pem --key /etc/apache2/{{ auth_fqdn }}.pem --ca /etc/apache2/{{ auth_fqdn }}.pem
+    command: penatesserver-manage service http {{ auth_fqdn }} 443 --role "Service" --fqdn {{ penates_directory_hostname }} --description "Penates Webservices" --kerberos_service HTTP --keytab /etc/apache2/http.keytab --cert /etc/apache2/{{ auth_fqdn }}.pem --key /etc/apache2/{{ auth_fqdn }}.pem --ca /etc/apache2/{{ auth_fqdn }}.pem --encryption=tls
     tags:
       - penatesserver
   - command: kinit -t /etc/apache2/http.keytab -k HTTP/{{ penates_directory_hostname }}@{{ penates_domain|upper }}
