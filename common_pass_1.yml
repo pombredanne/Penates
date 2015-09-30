@@ -17,27 +17,27 @@
   - template: src=templates/common/hosts dest=/etc/hosts
   - apt: pkg=ca-certificates state=latest
   - name: CA root certificate (1/2)
-    copy: src=private/ca_crt.pem dest=/etc/ssl/certs/Penates_CA.pem mode=0644
+    template: src=private/ca_crt.pem dest=/etc/ssl/certs/Penates_CA.pem mode=0644
   - name: CA root certificate (2/2)
-    copy: src=private/ca_crt.pem dest=/usr/share/ca-certificates/Penates_CA.crt mode=0644
+    template: src=private/ca_crt.pem dest=/usr/share/ca-certificates/Penates_CA.crt mode=0644
   - name: config CA root certificate
     lineinfile: dest=/etc/ca-certificates.conf line=Penates_CA.crt state=present
   - name: CA user certificate (1/2)
-    copy: src=private/users_crt.pem dest=/etc/ssl/certs/Penates_Users.pem mode=0644
+    template: src=private/users_crt.pem dest=/etc/ssl/certs/Penates_Users.pem mode=0644
   - name: CA user certificate (2/2)
-    copy: src=private/users_crt.pem dest=/usr/share/users-certificates/Penates_Users.crt mode=0644
+    template: src=private/users_crt.pem dest=/usr/share/ca-certificates/Penates_Users.crt mode=0644
   - name: config users root certificate
     lineinfile: dest=/etc/ca-certificates.conf line=Penates_Users.crt state=present
   - name: CA service certificate (1/2)
-    copy: src=private/services_crt.pem dest=/etc/ssl/certs/Penates_Services.pem mode=0644
+    template: src=private/services_crt.pem dest=/etc/ssl/certs/Penates_Services.pem mode=0644
   - name: CA service certificate (2/2)
-    copy: src=private/services_crt.pem dest=/usr/share/services-certificates/Penates_Services.crt mode=0644
+    template: src=private/services_crt.pem dest=/usr/share/ca-certificates/Penates_Services.crt mode=0644
   - name: config services root certificate
     lineinfile: dest=/etc/ca-certificates.conf line=Penates_Services.crt state=present
   - name: CA host certificate (1/2)
-    copy: src=private/hosts_crt.pem dest=/etc/ssl/certs/Penates_Hosts.pem mode=0644
+    template: src=private/hosts_crt.pem dest=/etc/ssl/certs/Penates_Hosts.pem mode=0644
   - name: CA host certificate (2/2)
-    copy: src=private/hosts_crt.pem dest=/usr/share/hosts-certificates/Penates_Hosts.crt mode=0644
+    template: src=private/hosts_crt.pem dest=/usr/share/ca-certificates/Penates_Hosts.crt mode=0644
   - name: config hosts root certificate
     lineinfile: dest=/etc/ca-certificates.conf line=Penates_Hosts.crt state=present
 

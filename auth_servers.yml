@@ -106,6 +106,24 @@
   - copy: src=private/ca_key.pem dest=/var/penatesserver/data/pki/private/cakey.pem owner=penatesserver mode=0600 group=penatesserver
     tags:
       - penatesserver
+  - copy: src=private/hosts_crt.pem dest=/var/penatesserver/data/pki/hosts_crt.pem owner=penatesserver mode=0644 group=penatesserver
+    tags:
+      - penatesserver
+  - copy: src=private/hosts_key.pem dest=/var/penatesserver/data/pki/private/hosts_key.pem owner=penatesserver mode=0600 group=penatesserver
+    tags:
+      - penatesserver
+  - copy: src=private/services_crt.pem dest=/var/penatesserver/data/pki/services_crt.pem owner=penatesserver mode=0644 group=penatesserver
+    tags:
+      - penatesserver
+  - copy: src=private/services_key.pem dest=/var/penatesserver/data/pki/private/services_key.pem owner=penatesserver mode=0600 group=penatesserver
+    tags:
+      - penatesserver
+  - copy: src=private/users_crt.pem dest=/var/penatesserver/data/pki/users_crt.pem owner=penatesserver mode=0644 group=penatesserver
+    tags:
+      - penatesserver
+  - copy: src=private/users_key.pem dest=/var/penatesserver/data/pki/private/users_key.pem owner=penatesserver mode=0600 group=penatesserver
+    tags:
+      - penatesserver
   - postgresql_user: name=penatesserver password={{ penatesserver_password }} role_attr_flags=NOSUPERUSER
     name: create database user for PenatesServer
     sudo_user: postgres
