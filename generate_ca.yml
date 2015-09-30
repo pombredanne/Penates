@@ -1,7 +1,7 @@
 ---
 - hosts: generate_iso
   vars:
-    base_dir: private_tmp
+    base_dir: private
     ca_key_path: "{{ base_dir }}/ca_key.pem"
     ca_crt_path: "{{ base_dir }}/ca_crt.pem"
     ca_req_path: "{{ base_dir }}/ca_req.pem"
@@ -15,7 +15,7 @@
     services_crt_path: "{{ base_dir }}/services_crt.pem"
     services_req_path: "{{ base_dir }}/services_req.pem"
     ssh_key_path: "{{ base_dir }}/id_rsa"
-    key_size: 1024
+    key_size: 4096
   tasks:
 
   - stat: path="{{ ssh_key_path }}"
@@ -27,7 +27,9 @@
   - command: "openssl genrsa -out {{ ca_key_path }} {{ key_size }}"
     when: ca_key_exists.stat.exists == False
   - command: "openssl req  -out {{ ca_req_path }} -batch -utf8 -new -key {{ ca_key_path }} -sha256 -config cache/openssl_ca.conf -extensions ca_req"
+    when: ca_key_exists.stat.exists == False
   - command: "openssl x509 -set_serial 1 -in {{ ca_req_path }} -out {{ ca_crt_path }} -req -signkey {{ ca_key_path }} -days 8000 -extensions ca_req -extfile cache/openssl_ca.conf  -sha256"
+    when: ca_key_exists.stat.exists == False
 
   - template: src=templates/generate_ca/openssl_users.conf dest=cache/openssl_users.conf
   - command: "openssl genrsa -out {{ users_key_path }} {{ key_size }}"

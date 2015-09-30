@@ -1,7 +1,7 @@
 # TLS settings
 dn: cn=config
 replace: olcTLSCACertificateFile
-olcTLSCACertificateFile: /etc/ssl/certs/Penates_CA.pem
+olcTLSCACertificateFile: /etc/ssl/certs/Penates_Services.pem
 -
 replace: olcTLSCertificateFile
 olcTLSCertificateFile: /etc/ldap/slapd.d/{{ auth_fqdn }}.crt
