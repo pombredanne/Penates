@@ -1,14 +1,48 @@
 ---
 - hosts: generate_iso
   vars:
-    ca_key_path: private/ca_key.pem
-    ca_crt_path: private/ca_crt.pem
-    ca_req_path: private/ca_req.pem
-    ssh_key_path: private/id_rsa
+    base_dir: private_tmp
+    ca_key_path: "{{ base_dir }}/ca_key.pem"
+    ca_crt_path: "{{ base_dir }}/ca_crt.pem"
+    ca_req_path: "{{ base_dir }}/ca_req.pem"
+    users_key_path: "{{ base_dir }}/users_key.pem"
+    users_crt_path: "{{ base_dir }}/users_crt.pem"
+    users_req_path: "{{ base_dir }}/users_req.pem"
+    hosts_key_path: "{{ base_dir }}/hosts_key.pem"
+    hosts_crt_path: "{{ base_dir }}/hosts_crt.pem"
+    hosts_req_path: "{{ base_dir }}/hosts_req.pem"
+    services_key_path: "{{ base_dir }}/services_key.pem"
+    services_crt_path: "{{ base_dir }}/services_crt.pem"
+    services_req_path: "{{ base_dir }}/services_req.pem"
+    ssh_key_path: "{{ base_dir }}/id_rsa"
+    key_size: 1024
   tasks:
-  - file: path=private state=directory
-  - command: "openssl genrsa -out {{ ca_key_path }} 4096"
-  - template: src=templates/generate_ca/openssl.conf dest=cache/openssl.conf
-  - command: "openssl req  -out {{ ca_req_path }} -batch -utf8 -new -key {{ ca_key_path }} -sha256 -config cache/openssl.conf -extensions role_req"
-  - command: "openssl x509 -set_serial 1 -in {{ ca_req_path }} -out {{ ca_crt_path }} -req -signkey {{ ca_key_path }} -days 8000 -extensions role_req -extfile cache/openssl.conf  -sha256"
-  - command: "ssh-keygen -b 4096 -C admin@{{ penates_domain }} -t rsa -N '' -f {{ ssh_key_path }}"
+
+  - stat: path="{{ ssh_key_path }}"
+    register: ssh_key_exists
+  - stat: path="{{ ca_key_path }}"
+    register: ca_key_exists
+  - file: path="{{ base_dir }}" state=directory
+  - template: src=templates/generate_ca/openssl_ca.conf dest=cache/openssl_ca.conf
+  - command: "openssl genrsa -out {{ ca_key_path }} {{ key_size }}"
+    when: ca_key_exists.stat.exists == False
+  - command: "openssl req  -out {{ ca_req_path }} -batch -utf8 -new -key {{ ca_key_path }} -sha256 -config cache/openssl_ca.conf -extensions ca_req"
+  - command: "openssl x509 -set_serial 1 -in {{ ca_req_path }} -out {{ ca_crt_path }} -req -signkey {{ ca_key_path }} -days 8000 -extensions ca_req -extfile cache/openssl_ca.conf  -sha256"
+
+  - template: src=templates/generate_ca/openssl_users.conf dest=cache/openssl_users.conf
+  - command: "openssl genrsa -out {{ users_key_path }} {{ key_size }}"
+  - command: "openssl req  -out {{ users_req_path }} -batch -utf8 -new -key {{ users_key_path }} -sha256 -config cache/openssl_users.conf -extensions ca_req"
+  - command: "openssl x509 -set_serial 2 -in {{ users_req_path }} -out {{ users_crt_path }} -req -CA {{ ca_crt_path }} -CAkey {{ ca_key_path }} -days 8000 -extensions ca_req -extfile cache/openssl.conf  -sha256"
+
+  - template: src=templates/generate_ca/openssl_hosts.conf dest=cache/openssl_hosts.conf
+  - command: "openssl genrsa -out {{ hosts_key_path }} {{ key_size }}"
+  - command: "openssl req  -out {{ hosts_req_path }} -batch -utf8 -new -key {{ hosts_key_path }} -sha256 -config cache/openssl_hosts.conf -extensions ca_req"
+  - command: "openssl x509 -set_serial 3 -in {{ hosts_req_path }} -out {{ hosts_crt_path }} -req -CA {{ ca_crt_path }} -CAkey {{ ca_key_path }} -days 8000 -extensions ca_req -extfile cache/openssl.conf  -sha256"
+
+  - template: src=templates/generate_ca/openssl_services.conf dest=cache/openssl_services.conf
+  - command: "openssl genrsa -out {{ services_key_path }} {{ key_size }}"
+  - command: "openssl req  -out {{ services_req_path }} -batch -utf8 -new -key {{ services_key_path }} -sha256 -config cache/openssl_services.conf -extensions ca_req"
+  - command: "openssl x509 -set_serial 4 -in {{ services_req_path }} -out {{ services_crt_path }} -req -CA {{ ca_crt_path }} -CAkey {{ ca_key_path }} -days 8000 -extensions ca_req -extfile cache/openssl.conf  -sha256"
+
+  - command: "ssh-keygen -b {{ key_size }} -C admin@{{ penates_domain }} -t rsa -N '' -f {{ ssh_key_path }}"
+    when: ssh_key_exists.stat.exists == False
