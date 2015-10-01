@@ -1,1 +1,2 @@
 */admin@{{ penates_domain|upper }} *
+*-admin@{{ penates_domain|upper }} *

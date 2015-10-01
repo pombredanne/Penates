@@ -33,6 +33,6 @@
   - ufw: rule=allow port=67 proto=udp
     tags:
       - dhcp
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/dhcp/{{ dhcp_fqdn }}/67/?role=Service&protocol=udp"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/dhcp/{{ dhcp_fqdn }}/67/?role=Service&protocol=udp"
     tags:
       - dhcp

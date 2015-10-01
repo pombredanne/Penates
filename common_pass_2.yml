@@ -2,26 +2,30 @@
 - hosts: all_machines
   remote_user: root
   tasks:
-  - stat: path=/etc/krb5.keytab
+  - stat: path=/etc/host.keytab
     register: check_host_keytab
-  - command: "curl -o /etc/krb5.keytab https://{{ penates_directory_fqdn }}/no-auth/get_host_keytab/{{ ansible_nodename }}"
+  - command: "curl -o /etc/host.keytab https://{{ penates_directory_fqdn }}/no-auth/get_host_keytab/{{ ansible_nodename }}"
     when: check_host_keytab.stat.exists == False
+  - file: path=/etc/host.keytab owner=root mode=0600 group=root
+  - command: ktutil -k /etc/host.keytab list
+  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/ssh/{{ ansible_nodename }}.{{ penates_domain }}/22/?keytab=host"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/krb5.keytab --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_keytab/ssh/{{ ansible_nodename }}.{{ penates_domain }}/22/?keytab=host"
   - file: path=/etc/krb5.keytab owner=root mode=0600 group=root
   - command: ktutil -k /etc/krb5.keytab list
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/ssl/private/host.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_host_certificate/"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/ssl/private/host.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_host_certificate/"
   - file: path=/etc/ssl/private/host.pem owner=root mode=0600 group=root
   - command: "openssl x509 -in /etc/ssl/private/host.pem -out /etc/host.pem"
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --data-binary @/etc/ssh/ssh_host_ecdsa_key.pub --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_ssh_pub/"
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --data-binary @/etc/ssh/ssh_host_ed25519_key.pub --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_ssh_pub/"
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --data-binary @/etc/ssh/ssh_host_rsa_key.pub --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_ssh_pub/"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl --data-binary @/etc/ssh/ssh_host_ecdsa_key.pub --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_ssh_pub/"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl --data-binary @/etc/ssh/ssh_host_ed25519_key.pub --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_ssh_pub/"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl --data-binary @/etc/ssh/ssh_host_rsa_key.pub --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_ssh_pub/"
   - name: hosts configuration
     template: src=templates/common/hosts dest=/etc/hosts
 
-  - shell: "ifconfig | grep -B 2 `k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_info/ | grep REMOTE_ADDR | cut -f 2 -d ':'` | grep HWaddr | cut -d 'H' -f 2 | cut -d ' ' -f 2"
+  - shell: "ifconfig | grep -B 2 `k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_info/ | grep REMOTE_ADDR | cut -f 2 -d ':'` | grep HWaddr | cut -d 'H' -f 2 | cut -d ' ' -f 2"
     register: primary_mac_address
     tags:
       - dhcp
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_dhcp/{{ primary_mac_address.stdout }}/"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_dhcp/{{ primary_mac_address.stdout }}/"
     tags:
       - dhcp
   - apt: pkg=ntp
@@ -119,7 +123,7 @@
   - apt: pkg=isc-dhcp-server
     tags:
       - dhcp
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : -o /etc/dhcp/dhcpd.conf https://{{ penates_directory_fqdn }}/auth/conf/dhcpd.conf"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : -o /etc/dhcp/dhcpd.conf https://{{ penates_directory_fqdn }}/auth/conf/dhcpd.conf"
     tags:
       - dhcp
   - service: name=isc-dhcp-server state=restarted

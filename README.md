@@ -142,13 +142,12 @@ Step 5
 ------
 
   * Gitlab
-  * Maven
-  * Jenkins
+  * Gitlab CI
   * Readthedocs
   * Updoc
   * Vagrant mirror
   * CardDAV, CalDAV
-  * pypi mirror
+  * Pypi mirror
   * SIP
   
 Step 6
@@ -165,7 +164,14 @@ Step 7
   * backup
   * restauration depuis le backup
   
-  
+
+
+TODO
+----
+
+  * dhcp + ldap
+  * smtp + kerberos
+
 Notes
 -----
 

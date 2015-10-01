@@ -9,8 +9,8 @@
   - template: src=templates/mail_servers/amavis_99-local.conf dest=/etc/amavis/conf.d/99-local owner=root group=root mode=0644
   - apt: pkg=spamassassin
   - template: src=templates/mail_servers/mailname.txt dest=/etc/mailname owner=root group=root mode=0644
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/dkim/{{ mail_fqdn }}/10026/?role=Service1024&encryption=tls"
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/amavis/cert.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/dkim/{{ mail_fqdn }}/10026/?role=Service1024"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/dkim/{{ mail_fqdn }}/10026/?role=Service1024&encryption=tls"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/amavis/cert.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/dkim/{{ mail_fqdn }}/10026/?role=Service1024"
   - command: "openssl rsa -in /etc/amavis/cert.pem -out /etc/amavis/dkim.pem"
   - service: state=restarted name=amavis
   - command: "amavisd-new testkey"
@@ -24,9 +24,9 @@
   - file: path=/etc/dovecot state=directory
   - template: src=templates/mail_servers/dovecot.conf dest=/etc/dovecot/dovecot.conf owner=root group=root mode=0644
   - template: src=templates/mail_servers/dovecot-ldap.conf dest=/etc/dovecot/dovecot-ldap.conf owner=root group=root mode=0644
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/imap/{{ mail_fqdn }}/993/?keytab=imap&encryption=tls"
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/dovecot/imap.keytab --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_keytab/imap/{{ mail_fqdn }}/993/?keytab=imap"
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/dovecot/{{ mail_fqdn }}.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/imap/{{ mail_fqdn }}/993/"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/imap/{{ mail_fqdn }}/993/?keytab=imap&encryption=tls"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/dovecot/imap.keytab --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_keytab/imap/{{ mail_fqdn }}/993/?keytab=imap"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/dovecot/{{ mail_fqdn }}.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/imap/{{ mail_fqdn }}/993/"
   - command: "openssl x509 -in /etc/dovecot/{{ mail_fqdn }}.pem -out /etc/dovecot/{{ mail_fqdn }}.crt"
   - command: "openssl rsa -in /etc/dovecot/{{ mail_fqdn }}.pem -out /etc/dovecot/{{ mail_fqdn }}.key"
   - file: path=/etc/dovecot/{{ mail_fqdn }}.pem mode=0600 owner=root group=root
@@ -43,11 +43,11 @@
   - template: src=templates/mail_servers/dovecot.conf dest=/etc/dovecot/dovecot.conf owner=root group=root mode=0644
   - template: src=templates/mail_servers/mailname dest=/etc/mail/mailname owner=root group=root mode=0644
   - template: src=templates/mail_servers/smtpd.conf dest=/etc/smtpd.conf owner=root group=root mode=0644
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/smtp/{{ mail_fqdn }}/25/?keytab=smtp"
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/smtp/{{ mail_fqdn }}/465/?encryption=tls"
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/smtp/{{ mail_fqdn }}/587/?encryption=starttls"
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/opensmtpd/smtp.keytab --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_keytab/smtp/{{ mail_fqdn }}/25/?keytab=smtp"
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/opensmtpd/{{ mail_fqdn }}.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/smtp/{{ mail_fqdn }}/25/"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/smtp/{{ mail_fqdn }}/25/?keytab=smtp"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/smtp/{{ mail_fqdn }}/465/?encryption=tls"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/smtp/{{ mail_fqdn }}/587/?encryption=starttls"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/opensmtpd/smtp.keytab --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_keytab/smtp/{{ mail_fqdn }}/25/?keytab=smtp"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/opensmtpd/{{ mail_fqdn }}.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/smtp/{{ mail_fqdn }}/25/"
   - command: "openssl x509 -in /etc/opensmtpd/{{ mail_fqdn }}.pem -out /etc/opensmtpd/{{ mail_fqdn }}.crt"
   - command: "openssl rsa -in /etc/opensmtpd/{{ mail_fqdn }}.pem -out /etc/opensmtpd/{{ mail_fqdn }}.key"
   - file: path=/etc/opensmtpd/{{ mail_fqdn }}.pem mode=0o600 owner=root group=root

@@ -8,8 +8,8 @@
   - apt: pkg=rsyslog-gnutls
   - file: path=/var/log/hosts/ state=directory owner=syslog group=adm
   - file: path=/var/log/local/ state=directory owner=syslog group=adm
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/syslog/{{ log_fqdn }}/514/?encryption=tls"
-  - command: "k5start -q -f /etc/krb5.keytab -U -- curl -o /etc/rsyslog.d/rsyslogd.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/syslog/{{ log_fqdn }}/514/"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/syslog/{{ log_fqdn }}/514/?encryption=tls"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/rsyslog.d/rsyslogd.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/syslog/{{ log_fqdn }}/514/"
   - command: "openssl x509 -in /etc/rsyslog.d/rsyslogd.pem -out /etc/rsyslog.d/rsyslogd.crt"
   - command: "openssl rsa -in /etc/rsyslog.d/rsyslogd.pem -out /etc/rsyslog.d/rsyslogd.key"
   - file: path=/etc/rsyslog.d/rsyslogd.pem mode=0600 owner=root group=root
