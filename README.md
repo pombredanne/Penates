@@ -171,6 +171,14 @@ TODO
 
   * dhcp + ldap
   * smtp + kerberos
+  * multiple VLANs
+  
+  phy01.admin.test.example.org -> 10.11.1.100
+  10.11.1.100 -> phy01.admin.test.example.org
+  
+  phy01.test.example.org -> 192.168.1.42
+  192.168.1.42 -> phy01.test.example.org 
+  mail01.test.example.org -> phy01.test.example.org 
 
 Notes
 -----
