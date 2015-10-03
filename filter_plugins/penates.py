@@ -20,7 +20,7 @@ def hostname_to_dn(fqdn):
 
 
 def hostname_to_dn_first(fqdn):
-    """Convert a fqdn to its LDAP form
+    """Get the first component of a domain name
 
     >>> hostname_to_dn_first("test.example.com")
     u'test'
@@ -138,6 +138,7 @@ def mkpasswd(passwd, algo='SHA-256'):
     salt = generate_salt()
     result = crypt.crypt(passwd, algos[algo] + salt)
     return result
+
 
 
 class FilterModule(object):

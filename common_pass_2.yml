@@ -5,18 +5,20 @@
   - command: ifconfig
     register: ifconfig
   - set_fact: network_config="{{ ifconfig.stdout|parse_ifconfig(server=penates_server_subnet, admin=penates_admin_subnet, client=penates_client_subnet) }}"
+  - set_fact: infra_fqdn="{{ ansible_nodename }}.infra.{{ penates_domain }}"
+  - set_fact: admin_fqdn="{{ ansible_nodename }}.admin.{{ penates_domain }}"
   - stat: path=/etc/host.keytab
     register: check_host_keytab
-  - command: "curl -o /etc/host.keytab https://{{ penates_directory_fqdn }}/no-auth/get_host_keytab/{{ ansible_nodename }}"
+  - command: "curl -o /etc/host.keytab https://{{ penates_directory_fqdn }}/no-auth/get_host_keytab/{{ infra_fqdn }}"
     when: check_host_keytab.stat.exists == False
   - file: path=/etc/host.keytab owner=root mode=0600 group=root
   - command: ktutil -k /etc/host.keytab list
   - shell: "ifconfig | grep -B 2 `k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_info/ | grep REMOTE_ADDR | cut -f 2 -d ':'` | grep HWaddr | cut -d 'H' -f 2 | cut -d ' ' -f 2"
     register: primary_mac_address
-  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_dhcp/{{ primary_mac_address.stdout }}/?admin_mac_address={{ network_config['admin'][1] }}&admin_ip_address={{ network_config['admin'][2] }}"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_dhcp/{{ primary_mac_address.stdout }}/?mac_address={{ network_config['admin'][1] }}&ip_address={{ network_config['admin'][2] }}"
 
-  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/ssh/{{ ansible_nodename }}.{{ penates_domain }}/22/?keytab=host"
-  - command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/krb5.keytab --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_keytab/ssh/{{ ansible_nodename }}.{{ penates_domain }}/22/"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/ssh/{{ admin_fqdn }}/22/?keytab=host"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/krb5.keytab --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_keytab/ssh/{{ admin_fqdn }}/22/"
   - file: path=/etc/krb5.keytab owner=root mode=0600 group=root
   - command: ktutil -k /etc/krb5.keytab list
   - command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/ssl/private/host.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_host_certificate/"
