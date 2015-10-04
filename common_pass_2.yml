@@ -17,7 +17,7 @@
     register: primary_mac_address
   - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_dhcp/{{ primary_mac_address.stdout }}/?mac_address={{ network_config['admin'][1] }}&ip_address={{ network_config['admin'][2] }}"
 
-  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/ssh/{{ admin_fqdn }}/22/?keytab=host"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/ssh/{{ admin_fqdn }}/22/?keytab=host&srv=tcp/ssh"
   - command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/krb5.keytab --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_keytab/ssh/{{ admin_fqdn }}/22/"
   - file: path=/etc/krb5.keytab owner=root mode=0600 group=root
   - command: ktutil -k /etc/krb5.keytab list
