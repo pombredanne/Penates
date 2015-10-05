@@ -1,10 +1,16 @@
 ---
 - hosts: all_machines
   remote_user: root
+  vars:
+    lang_env:
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+      LC_TYPE: en_US.UTF-8
   tasks:
   - command: ifconfig
+    environment: lang_env
     register: ifconfig
-  - set_fact: network_config="{{ ifconfig.stdout|parse_ifconfig(server=penates_server_subnet, admin=penates_admin_subnet, client=penates_client_subnet) }}"
+  - set_fact: network_config="{{ ifconfig.stdout|penates_ifconfig(server=penates_server_subnet, admin=penates_admin_subnet, client=penates_client_subnet) }}"
   - set_fact: infra_fqdn="{{ ansible_nodename }}.infra.{{ penates_domain }}"
   - set_fact: admin_fqdn="{{ ansible_nodename }}.admin.{{ penates_domain }}"
   - stat: path=/etc/host.keytab
@@ -15,7 +21,7 @@
   - command: ktutil -k /etc/host.keytab list
   - shell: "ifconfig | grep -B 2 `k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_info/ | grep REMOTE_ADDR | cut -f 2 -d ':'` | grep HWaddr | cut -d 'H' -f 2 | cut -d ' ' -f 2"
     register: primary_mac_address
-  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_dhcp/{{ primary_mac_address.stdout }}/?mac_address={{ network_config['admin'][1] }}&ip_address={{ network_config['admin'][2] }}"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_dhcp/{{ primary_mac_address.stdout }}/?mac_address={{ network_config|ifcache('admin', 1) }}&ip_address={{ network_config|ifcache('admin', 2) }}"
 
   - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/ssh/{{ admin_fqdn }}/22/?keytab=host&srv=tcp/ssh"
   - command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/krb5.keytab --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_keytab/ssh/{{ admin_fqdn }}/22/"

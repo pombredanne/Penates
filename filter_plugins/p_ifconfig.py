@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import re
+import uuid
 import netaddr
 __author__ = 'Matthieu Gallet'
 
@@ -23,6 +24,8 @@ lo        Link encap:Local Loopback
           collisions:0 txqueuelen:0
           RX bytes:5910436 (5.9 MB)  TX bytes:5910436 (5.9 MB)"""
 
+__cache = {}
+
 
 def parse_ifconfig(content, **kwargs):
     """
@@ -32,18 +35,25 @@ def parse_ifconfig(content, **kwargs):
     :return: {'kwarg_key1': None|(name, hwaddr, addr), 'kwarg_key2': None|(name, hwaddr, addr)}
     :rtype: :class:`dict`
 
-    >>> parse_ifconfig(__test_string, test='10.19.1.0/24') == {'test': ('eth0', '08:00:27:f4:11:d0', '10.19.1.134')}
+    >>> x = parse_ifconfig(__test_string, admin='10.19.1.0/24', server='10.19.1.0/24')
+    >>> __cache[x] == {'admin': ('eth0', '08:00:27:f4:11:d0', '10.19.1.134'), 'server': ('eth0', '08:00:27:f4:11:d0', '10.19.1.134')}
     True
-    >>> parse_ifconfig(__test_string, test='10.19.2.0/24') == {'test': None}
+    >>> ifcache(x, 'admin', 0) == 'eth0'
+    True
+    >>> ifcache(x, 'admin', 2) == '10.19.1.134'
+    True
+    >>> x = parse_ifconfig(__test_string, test='10.19.2.0/24')
+    >>> __cache[x] == {'test': None}
     True
 
     """
-    start_regexp = re.compile(r'^([\w_\-]+)\s+Link encap:([\w_\- ]+)\s+HWaddr (([a-f\dA-F]{2}):([a-f\dA-F]{2}):([a-f\dA-F]{2}):([a-f\dA-F]{2}):([a-f\dA-F]{2}):([a-f\dA-F]{2}))$')
+    start_regexp = re.compile(r'^([\w_\-]+)\s+Link encap:([\w_\- ]+)\s+HWaddr (([a-f\dA-F]{2}):([a-f\dA-F]{2}):([a-f\dA-F]{2}):([a-f\dA-F]{2}):([a-f\dA-F]{2}):([a-f\dA-F]{2}))\s*$')
     ip4_regexp = re.compile(r'^\s+inet addr:([\d\.]{7,})\s+.*$')
     ip6_regexp = re.compile(r'^\s+inet6 addr:\s*([\d:/a-f]+)\s+.*$')
     current_name, current_hw_addr = None, None
     result = {key: None for (key, value) in kwargs.items()}
     networks = {key: netaddr.IPNetwork(value) for (key, value) in kwargs.items()}
+    key = uuid.uuid4()
     for line in content.splitlines():
         matcher = start_regexp.match(line)
         if matcher:
@@ -65,13 +75,21 @@ def parse_ifconfig(content, **kwargs):
                 if network.version == 6 and ip6 in network:
                     result[network_name] = (current_name, current_hw_addr, str(ip6))
             continue
-    return result
+    __cache[str(key)] = result
+
+    return str(key)
+
+
+def ifcache(content, name, value):
+    values = __cache[content]
+    by_name = values[name]
+    return by_name[value]
 
 
 class FilterModule(object):
     # noinspection PyMethodMayBeStatic
     def filters(self):
-        return {'parse_ifconfig': parse_ifconfig, }
+        return {'penates_ifconfig': parse_ifconfig, 'ifcache': ifcache, }
 
 if __name__ == '__main__':
     import doctest

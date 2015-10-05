@@ -113,7 +113,7 @@ Step 2
   * [OK] CA generation
   * supervision
     * shinken
-    * webui
+    * adagios
     * graphite
     * snmp
   * TFTP server + ISO mirror
@@ -163,7 +163,6 @@ Step 7
   * 802.1x
   * backup
   * restauration depuis le backup
-  
 
 
 TODO
@@ -171,14 +170,8 @@ TODO
 
   * dhcp + ldap
   * smtp + kerberos
-  * multiple VLANs
-  
-  phy01.admin.test.example.org -> 10.11.1.100
-  10.11.1.100 -> phy01.admin.test.example.org
-  
-  phy01.test.example.org -> 192.168.1.42
-  192.168.1.42 -> phy01.test.example.org 
-  mail01.test.example.org -> phy01.test.example.org 
+  * limiter l'écoute sur la bonne interface
+  * ajouter un password admin sur penatesserver (header/get ?)
 
 Notes
 -----
