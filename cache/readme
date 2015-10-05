@@ -1,0 +1,234 @@
+{
+    "ansible_facts": {
+        "ansible_all_ipv4_addresses": [
+            "10.0.2.15",
+            "192.168.10.10"
+        ],
+        "ansible_all_ipv6_addresses": [
+            "fe80::a00:27ff:fe12:9698",
+            "fe80::a00:27ff:fe74:1330"
+        ],
+        "ansible_architecture": "i386",
+        "ansible_bios_date": "12/01/2006",
+        "ansible_bios_version": "VirtualBox",
+        "ansible_cmdline": {
+            "BOOT_IMAGE": "/vmlinuz-3.2.0-23-generic-pae",
+            "quiet": true,
+            "ro": true,
+            "root": "/dev/mapper/precise32-root"
+        },
+        "ansible_date_time": {
+            "date": "2013-09-17",
+            "day": "17",
+            "epoch": "1379378304",
+            "hour": "00",
+            "iso8601": "2013-09-17T00:38:24Z",
+            "iso8601_micro": "2013-09-17T00:38:24.425092Z",
+            "minute": "38",
+            "month": "09",
+            "second": "24",
+            "time": "00:38:24",
+            "tz": "UTC",
+            "year": "2013"
+        },
+        "ansible_default_ipv4": {
+            "address": "10.0.2.15",
+            "alias": "eth0",
+            "gateway": "10.0.2.2",
+            "interface": "eth0",
+            "macaddress": "08:00:27:12:96:98",
+            "mtu": 1500,
+            "netmask": "255.255.255.0",
+            "network": "10.0.2.0",
+            "type": "ether"
+        },
+        "ansible_default_ipv6": {},
+        "ansible_devices": {
+            "sda": {
+                "holders": [],
+                "host": "SATA controller: Intel Corporation 82801HM/HEM (ICH8M/ICH8M-E) SATA Controller [AHCI mode] (rev 02)",
+                "model": "VBOX HARDDISK",
+                "partitions": {
+                    "sda1": {
+                        "sectors": "497664",
+                        "sectorsize": 512,
+                        "size": "243.00 MB",
+                        "start": "2048"
+                    },
+                    "sda2": {
+                        "sectors": "2",
+                        "sectorsize": 512,
+                        "size": "1.00 KB",
+                        "start": "501758"
+                    },
+                },
+                "removable": "0",
+                "rotational": "1",
+                "scheduler_mode": "cfq",
+                "sectors": "167772160",
+                "sectorsize": "512",
+                "size": "80.00 GB",
+                "support_discard": "0",
+                "vendor": "ATA"
+            },
+            "sr0": {
+                "holders": [],
+                "host": "IDE interface: Intel Corporation 82371AB/EB/MB PIIX4 IDE (rev 01)",
+                "model": "CD-ROM",
+                "partitions": {},
+                "removable": "1",
+                "rotational": "1",
+                "scheduler_mode": "cfq",
+                "sectors": "2097151",
+                "sectorsize": "512",
+                "size": "1024.00 MB",
+                "support_discard": "0",
+                "vendor": "VBOX"
+            },
+            "sr1": {
+                "holders": [],
+                "host": "IDE interface: Intel Corporation 82371AB/EB/MB PIIX4 IDE (rev 01)",
+                "model": "CD-ROM",
+                "partitions": {},
+                "removable": "1",
+                "rotational": "1",
+                "scheduler_mode": "cfq",
+                "sectors": "2097151",
+                "sectorsize": "512",
+                "size": "1024.00 MB",
+                "support_discard": "0",
+                "vendor": "VBOX"
+            }
+        },
+        "ansible_distribution": "Ubuntu",
+        "ansible_distribution_release": "precise",
+        "ansible_distribution_version": "12.04",
+        "ansible_domain": "",
+        "ansible_eth0": {
+            "active": true,
+            "device": "eth0",
+            "ipv4": {
+                "address": "10.0.2.15",
+                "netmask": "255.255.255.0",
+                "network": "10.0.2.0"
+            },
+            "ipv6": [
+                {
+                    "address": "fe80::a00:27ff:fe12:9698",
+                    "prefix": "64",
+                    "scope": "link"
+                }
+            ],
+            "macaddress": "08:00:27:12:96:98",
+            "module": "e1000",
+            "mtu": 1500,
+            "type": "ether"
+        },
+        "ansible_eth1": {
+            "active": true,
+            "device": "eth1",
+            "ipv4": {
+                "address": "192.168.10.10",
+                "netmask": "255.255.255.0",
+                "network": "192.168.10.0"
+            },
+            "ipv6": [
+                {
+                    "address": "fe80::a00:27ff:fe74:1330",
+                    "prefix": "64",
+                    "scope": "link"
+                }
+            ],
+            "macaddress": "08:00:27:74:13:30",
+            "module": "e1000",
+            "mtu": 1500,
+            "type": "ether"
+        },
+        "ansible_form_factor": "Other",
+        "ansible_fqdn": "scdev",
+        "ansible_hostname": "scdev",
+        "ansible_interfaces": [
+            "lo",
+            "eth1",
+            "eth0"
+        ],
+        "ansible_kernel": "3.2.0-23-generic-pae",
+        "ansible_lo": {
+            "active": true,
+            "device": "lo",
+            "ipv4": {
+                "address": "127.0.0.1",
+                "netmask": "255.0.0.0",
+                "network": "127.0.0.0"
+            },
+            "ipv6": [
+                {
+                    "address": "::1",
+                    "prefix": "128",
+                    "scope": "host"
+                }
+            ],
+            "mtu": 16436,
+            "type": "loopback"
+        },
+        "ansible_lsb": {
+            "codename": "precise",
+            "description": "Ubuntu 12.04 LTS",
+            "id": "Ubuntu",
+            "major_release": "12",
+            "release": "12.04"
+        },
+        "ansible_machine": "i686",
+        "ansible_memfree_mb": 23,
+        "ansible_memtotal_mb": 369,
+        "ansible_mounts": [
+            {
+                "device": "/dev/mapper/precise32-root",
+                "fstype": "ext4",
+                "mount": "/",
+                "options": "rw,errors=remount-ro",
+                "size_available": 77685088256,
+                "size_total": 84696281088
+            },
+            {
+                "device": "/dev/sda1",
+                "fstype": "ext2",
+                "mount": "/boot",
+                "options": "rw",
+                "size_available": 201044992,
+                "size_total": 238787584
+            },
+            {
+                "device": "/vagrant",
+                "fstype": "vboxsf",
+                "mount": "/vagrant",
+                "options": "uid=1000,gid=1000,rw",
+                "size_available": 42013151232,
+                "size_total": 484145360896
+            }
+        ],
+        "ansible_os_family": "Debian",
+        "ansible_pkg_mgr": "apt",
+        "ansible_processor": [
+            "Pentium(R) Dual-Core  CPU      E5300  @ 2.60GHz"
+        ],
+        "ansible_processor_cores": "NA",
+        "ansible_processor_count": 1,
+        "ansible_product_name": "VirtualBox",
+        "ansible_product_serial": "NA",
+        "ansible_product_uuid": "NA",
+        "ansible_product_version": "1.2",
+        "ansible_python_version#": "2.7.3",
+        "ansible_selinux": false,
+        "ansible_swapfree_mb": 766,
+        "ansible_swaptotal_mb": 767,
+        "ansible_system": "Linux",
+        "ansible_system_vendor": "innotek GmbH",
+        "ansible_user_id": "neves",
+        "ansible_userspace_architecture": "i386",
+        "ansible_userspace_bits": "32",
+        "ansible_virtualization_role": "guest",
+        "ansible_virtualization_type": "virtualbox"
+    },
+    "changed": false
+}

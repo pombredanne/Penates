@@ -13,6 +13,8 @@
   - set_fact: network_config="{{ ifconfig.stdout|penates_ifconfig(server=penates_server_subnet, admin=penates_admin_subnet, client=penates_client_subnet) }}"
   - set_fact: infra_fqdn="{{ ansible_nodename }}.infra.{{ penates_domain }}"
   - set_fact: admin_fqdn="{{ ansible_nodename }}.admin.{{ penates_domain }}"
+  - set_fact: has_admin_iface="{{ network_config|has_iface('admin') }}"
+  - apt: pkg=ufw state=latest
   - stat: path=/etc/host.keytab
     register: check_host_keytab
   - command: "curl -o /etc/host.keytab https://{{ penates_directory_fqdn }}/no-auth/get_host_keytab/{{ infra_fqdn }}"
@@ -22,17 +24,27 @@
   - shell: "ifconfig | grep -B 2 `k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_info/ | grep REMOTE_ADDR | cut -f 2 -d ':'` | grep HWaddr | cut -d 'H' -f 2 | cut -d ' ' -f 2"
     register: primary_mac_address
   - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_dhcp/{{ primary_mac_address.stdout }}/?mac_address={{ network_config|ifcache('admin', 1) }}&ip_address={{ network_config|ifcache('admin', 2) }}"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/ssl/private/host.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_host_certificate/"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/ssl/private/admin.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_admin_certificate/"
+  - file: path=/etc/ssl/private/host.pem owner=root mode=0600 group=root
+  - command: "openssl x509 -in /etc/ssl/private/host.pem -out /etc/host.pem"
+  - file: path=/etc/ssl/private/admin.pem owner=root mode=0600 group=root
+  - command: "openssl x509 -in /etc/ssl/private/admin.pem -out /etc/admin.pem"
 
   - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/ssh/{{ admin_fqdn }}/22/?keytab=host&srv=tcp/ssh"
   - command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/krb5.keytab --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_keytab/ssh/{{ admin_fqdn }}/22/"
   - file: path=/etc/krb5.keytab owner=root mode=0600 group=root
   - command: ktutil -k /etc/krb5.keytab list
-  - command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/ssl/private/host.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_host_certificate/"
-  - file: path=/etc/ssl/private/host.pem owner=root mode=0600 group=root
-  - command: "openssl x509 -in /etc/ssl/private/host.pem -out /etc/host.pem"
   - command: "k5start -q -f /etc/host.keytab -U -- curl --data-binary @/etc/ssh/ssh_host_ecdsa_key.pub --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_ssh_pub/"
   - command: "k5start -q -f /etc/host.keytab -U -- curl --data-binary @/etc/ssh/ssh_host_ed25519_key.pub --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_ssh_pub/"
   - command: "k5start -q -f /etc/host.keytab -U -- curl --data-binary @/etc/ssh/ssh_host_rsa_key.pub --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_ssh_pub/"
+  - ufw: rule=limit port=22 proto=tcp interface="{{ network_config|ifcache('admin', 0) }}" direction=in
+    when: has_admin_iface
+  - ufw: rule=limit port=22 proto=tcp
+    when: not has_admin_iface
+  - ufw: state=enabled
+  - ufw: policy=deny direction=incoming
+
   - name: hosts configuration
     template: src=templates/common/hosts dest=/etc/hosts
 
@@ -100,10 +112,18 @@
   - template: src=templates/common/snmp/snmptrapd.conf dest=/etc/snmp/snmptrapd.conf
     tags:
       - snmp
+  - ufw: rule=allow port=161 proto=udp interface="{{ network_config|ifcache('admin', 0) }}" direction=in
+    when: has_admin_iface
+    tags:
+      - snmp
   - ufw: rule=allow port=161 proto=udp
+    when: not has_admin_iface
+    tags:
+      - snmp
   - service: name=snmpd state=restarted
     tags:
       - snmp
+  - command: snmpwalk -c -v 3
 
   - apt: pkg=clamav
     tags:
@@ -124,7 +144,6 @@
     tags:
       - antivirus
 
-
 - hosts: dhcp_servers
   remote_user: root
   tasks:
@@ -140,7 +159,6 @@
   - service: name=isc-dhcp-server6 state=restarted
     tags:
       - dhcp
-
 
 - hosts: auth_servers
   remote_user: root

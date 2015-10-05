@@ -2,10 +2,6 @@
 - hosts: all_machines
   remote_user: root
   tasks:
-  - apt: pkg=ufw state=latest
-  - ufw: rule=limit port=ssh proto=tcp
-  - ufw: state=enabled
-  - ufw: policy=deny direction=incoming
   - copy: src=files/common/sources.list dest=/etc/apt/sources.list owner=root mode=0644 group=root
   - command: apt-get update
   - apt: pkg=heimdal-clients state=latest

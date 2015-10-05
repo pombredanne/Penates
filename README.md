@@ -170,7 +170,6 @@ TODO
 
   * dhcp + ldap
   * smtp + kerberos
-  * limiter l'écoute sur la bonne interface
   * ajouter un password admin sur penatesserver (header/get ?)
 
 Notes

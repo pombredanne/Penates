@@ -36,7 +36,7 @@ def parse_ifconfig(content, **kwargs):
     :rtype: :class:`dict`
 
     >>> x = parse_ifconfig(__test_string, admin='10.19.1.0/24', server='10.19.1.0/24')
-    >>> __cache[x] == {'admin': ('eth0', '08:00:27:f4:11:d0', '10.19.1.134'), 'server': ('eth0', '08:00:27:f4:11:d0', '10.19.1.134')}
+    >>> __cache[x] == {'admin': ('eth0', '08:00:27:f4:11:d0', '10.19.1.134', 4), 'server': ('eth0', '08:00:27:f4:11:d0', '10.19.1.134', 4)}
     True
     >>> ifcache(x, 'admin', 0) == 'eth0'
     True
@@ -44,6 +44,8 @@ def parse_ifconfig(content, **kwargs):
     True
     >>> x = parse_ifconfig(__test_string, test='10.19.2.0/24')
     >>> __cache[x] == {'test': None}
+    True
+    >>> ifcache(x, 'test', 0) == ''
     True
 
     """
@@ -66,14 +68,14 @@ def parse_ifconfig(content, **kwargs):
             ip4 = netaddr.IPAddress(matcher.group(1))
             for network_name, network in networks.items():
                 if network.version == 4 and ip4 in network:
-                    result[network_name] = (current_name, current_hw_addr, str(ip4))
+                    result[network_name] = (current_name, current_hw_addr, str(ip4), 4)
             continue
         matcher = ip6_regexp.match(line)
         if matcher:
             ip6 = netaddr.IPAddress(matcher.group(1).partition(str('/'))[0])
             for network_name, network in networks.items():
                 if network.version == 6 and ip6 in network:
-                    result[network_name] = (current_name, current_hw_addr, str(ip6))
+                    result[network_name] = (current_name, current_hw_addr, str(ip6), 6)
             continue
     __cache[str(key)] = result
 
@@ -83,13 +85,19 @@ def parse_ifconfig(content, **kwargs):
 def ifcache(content, name, value):
     values = __cache[content]
     by_name = values[name]
-    return by_name[value]
+    if by_name:
+        return by_name[value]
+    return ''
+
+
+def has_iface(content, name):
+    return bool(__cache[content][name])
 
 
 class FilterModule(object):
     # noinspection PyMethodMayBeStatic
     def filters(self):
-        return {'penates_ifconfig': parse_ifconfig, 'ifcache': ifcache, }
+        return {'penates_ifconfig': parse_ifconfig, 'ifcache': ifcache, 'has_iface': has_iface, }
 
 if __name__ == '__main__':
     import doctest
