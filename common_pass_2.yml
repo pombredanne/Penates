@@ -123,7 +123,20 @@
   - service: name=snmpd state=restarted
     tags:
       - snmp
-  - command: snmpwalk -c -v 3
+  - lineinfile: dest=/etc/snmp/snmpd.conf state=absent line="createUser penates SHA {{ penates_snmpd_password }} AES {{ penates_snmpd_aes_password }}"
+    tags:
+      - snmp
+  - service: name=snmpd state=restarted
+    tags:
+      - snmp
+  - command: snmpwalk -v 3 -u penates -l authNoPriv -a SHA -A '{{ penates_snmpd_password }}' -x AES -X '{{ penates_snmpd_aes_password }}' {{ network_config|ifcache('admin', 2) }}
+    when: has_admin_iface
+    tags:
+      - snmp
+  - command: snmpwalk -v 3 -u penates -l authNoPriv -a SHA -A '{{ penates_snmpd_password }}' -x AES -X '{{ penates_snmpd_aes_password }}' localhost
+    when: not has_admin_iface
+    tags:
+      - snmp
 
   - apt: pkg=clamav
     tags:

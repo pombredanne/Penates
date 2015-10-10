@@ -97,11 +97,7 @@ Step 2
     * [OK] centralization
     * [OK] >= warning
     * [OK] logrotate
-  * snmpd
-  * journald
-    * centralization
-    * warning
-    * logrotate
+  * [OK] snmpd
   * rkhunter
   * [OK] ISO generation
     * [OK] login
@@ -171,6 +167,16 @@ TODO
   * dhcp + ldap
   * smtp + kerberos
   * ajouter un password admin sur penatesserver (header/get ?)
+  
+  * serveur d'installation :
+  
+    * DHCP
+    * miroir Ubuntu
+    * miroir pour les paquets supplémentaires
+    * serveur TFTP
+    * génération des clefs
+    
+  * poste d'administration
 
 Notes
 -----

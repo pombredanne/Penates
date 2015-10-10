@@ -2,4 +2,4 @@
 ::1     localhost ip6-localhost ip6-loopback
 ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
-{{ penates_auth_server_ip }} {{ penates_directory_hostname }} {{ penates_directory_fqdn }}
+{{ penates_auth_server_ip }} {{ penates_directory_hostname }} {{ penates_directory_fqdn }} {{ penates_directory_hostname.split('.')[0] }}
