@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import hashlib
 import random
 import re
 import crypt
@@ -141,10 +142,7 @@ def mkpasswd(passwd, algo='SHA-256'):
 
 
 def randomize_passwd(passwd):
-    salt_set = ('abcdefghijklmnopqrstuvwxyz'
-                'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-                '0123456789._-')
-    return ''.join([random.choice(salt_set) for c in range(100)])
+    return hashlib.sha256(passwd.encode('utf-8')).hexdigest()
 
 
 class FilterModule(object):

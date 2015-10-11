@@ -11,10 +11,18 @@
   - apt: pkg=shinken-mod-pickle-retention-file-generic
   - apt: pkg=shinken-mod-webui
   - apt: pkg=shinken-core
-  - apt: pkg=shinken-mod-ui-graphite
-  - apt: pkg=shinken-mod-graphite
+#  - apt: pkg=shinken-mod-ui-graphite
+#  - apt: pkg=shinken-mod-graphite
   - apt: pkg=shinken-mod-booster-nrpe
   - apt: pkg=shinken-mod-hot-dependencies
+  - apt: pkg=shinken-mod-logstore-sqlite
+  - apt: pkg=nagios-plugins-basic
+  - file: path=/var/lib/shinken/inventory state=directory
+  - file: path=/var/lib/shinken/doc state=directory
+  - file: path=/var/lib/shinken/share state=directory
+  - file: path=/var/lib/shinken/inventory state=directory
+  - template: src=templates/supervision_servers/shinken.ini dest=/root/.shinken.ini mode=0644
+
   - template: src=templates/supervision_servers/contacts.cfg dest=/etc/shinken/contacts.cfg mode=0644
   - template: src=templates/supervision_servers/resource.cfg dest=/etc/shinken/resource.cfg mode=0644
   - template: src=templates/supervision_servers/shinken.cfg dest=/etc/shinken/shinken.cfg mode=0644
@@ -56,8 +64,15 @@
   - file: path=/etc/shinken/shinken.key mode=0400
 
   - template: src=templates/supervision_servers/modules/webui.cfg dest=/etc/shinken/modules/webui.cfg mode=0644
+  - template: src=templates/supervision_servers/modules/import-glpi.cfg dest=/etc/shinken/modules/import-glpi.cfg mode=0644
   - command: shinken-arbiter -v -c /etc/shinken/shinken.cfg
+
+  - command: shinken install import-glpi
+  - command: shinken install logstore-sqlite
+  - command: shinken install livestatus
+
   - service: name=shinken state=restarted
+  - ufw: rule=allow port=80 proto=tcp
 
   - include: "include/apache.yml"
     vars:
@@ -66,7 +81,6 @@
 
 #  - apt: pkg=graphite-web
 #  - apt: pkg=graphite-carbon
-#  - apt: pkg=python-psycopg2
 #  - template: src=templates/supervision_servers/graphite_settings.py dest=/etc/graphite/local_settings.py mode=0644
 #  - template: src=templates/supervision_servers/carbon_settings.ini dest=/etc/carbon/carbon.conf mode=0644
 #  - include: "include/postgresql.yml"
