@@ -138,13 +138,12 @@ Step 5
 ------
 
   * Gitlab
-  * Gitlab CI
+  * CardDAV, CalDAV
   * Readthedocs
   * Updoc
   * Vagrant mirror
-  * CardDAV, CalDAV
   * Pypi mirror
-  * SIP
+  * Asterix
   
 Step 6
 ------

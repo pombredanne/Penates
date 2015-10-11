@@ -140,6 +140,12 @@ def mkpasswd(passwd, algo='SHA-256'):
     return result
 
 
+def randomize_passwd(passwd):
+    salt_set = ('abcdefghijklmnopqrstuvwxyz'
+                'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+                '0123456789._-')
+    return ''.join([random.choice(salt_set) for c in range(100)])
+
 
 class FilterModule(object):
     # noinspection PyMethodMayBeStatic
@@ -158,4 +164,5 @@ class FilterModule(object):
                 'slugify': slugify,
                 'indexed_fqdn': indexed_fqdn,
                 'mkpasswd': mkpasswd,
+                'randomize_passwd': randomize_passwd,
                 }

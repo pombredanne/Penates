@@ -12,22 +12,23 @@
     command: hostname {{ penates_directory_hostname.partition('.')[0] }}
     tags:
       - powerdns
-  - apt: pkg=postgresql-9.4
+
+  - include: "include/postgresql.yml"
+    vars:
+      password: "{{ penatesserver_password }}"
+      user: penatesserver
+      database: penatesserver
     tags:
       - powerdns
       - penatesserver
-  - file: path=/etc/postgresql/9.4/main/conf.d state=directory
+  - include: "include/postgresql.yml"
+    vars:
+      password: "{{ powerdns_password }}"
+      user: powerdns
+      database: powerdns
     tags:
       - powerdns
-      - penatesserver
-  - template: src=templates/common/postgresql.conf dest=/etc/postgresql/9.4/main/postgresql.conf owner=root group=root mode=0644
-    tags:
-      - powerdns
-      - penatesserver
-  - service: name=postgresql state=restarted
-    tags:
-      - powerdns
-      - penatesserver
+      - pki
 
   - apt: pkg=python-pip
     tags:
@@ -39,12 +40,6 @@
     tags:
       - penatesserver
   - apt: pkg=libsasl2-dev
-    tags:
-      - penatesserver
-  - apt: pkg=libpq-dev
-    tags:
-      - penatesserver
-  - apt: pkg=postgresql-client
     tags:
       - penatesserver
   - name: create penatesserver user
@@ -64,9 +59,6 @@
     tags:
       - penatesserver
   - pip: name=django-filter
-    tags:
-      - penatesserver
-  - pip: name=psycopg2
     tags:
       - penatesserver
   - pip: name=pygments
@@ -124,33 +116,11 @@
   - copy: src=private/users_key.pem dest=/var/penatesserver/data/pki/private/users_key.pem owner=penatesserver mode=0600 group=penatesserver
     tags:
       - penatesserver
-  - postgresql_user: name=penatesserver password={{ penatesserver_password }} role_attr_flags=NOSUPERUSER
-    name: create database user for PenatesServer
-    sudo_user: postgres
-    tags:
-      - penatesserver
-  - postgresql_db: name=penatesserver owner=penatesserver encoding='UTF-8' lc_collate='fr_FR.UTF-8' lc_ctype='fr_FR.UTF-8'
-    name: create database for PenatesServer
-    sudo_user: postgres
-    tags:
-      - penatesserver
   - name: copy PenatesServer configuration
     template: src=templates/auth_servers/penatesserver.ini dest=/etc/penatesserver/settings.ini owner=penatesserver group=penatesserver mode=0644
     tags:
       - penatesserver
   - copy: src=files/auth_servers/powerdns.sql dest=/tmp/powerdns.sql
-    tags:
-      - powerdns
-      - pki
-  - postgresql_user: name=powerdns password={{ powerdns_password }} role_attr_flags=NOSUPERUSER
-    name: create database user for powerdns
-    sudo_user: postgres
-    tags:
-      - powerdns
-      - pki
-  - postgresql_db: name=powerdns owner=powerdns encoding='UTF-8' lc_collate='fr_FR.UTF-8' lc_ctype='fr_FR.UTF-8'
-    name: create database for powerdns
-    sudo_user: postgres
     tags:
       - powerdns
       - pki
@@ -363,7 +333,7 @@
     tags:
       - penatesserver
       - kerberos
-
+#  - include: include/apache.yml
   - apt: pkg=apache2
     tags:
       - penatesserver

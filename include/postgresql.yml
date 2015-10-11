@@ -1,0 +1,11 @@
+- apt: pkg=postgresql-9.4
+- file: path=/etc/postgresql/9.4/main/conf.d state=directory
+- template: src=templates/common/postgresql.conf dest=/etc/postgresql/9.4/main/postgresql.conf owner=root group=root mode=0644
+- service: name=postgresql state=restarted
+- apt: pkg=libpq-dev
+- apt: pkg=postgresql-client
+- apt: name=python-psycopg2
+- postgresql_user: name={{ user }} password={{ password }} role_attr_flags=NOSUPERUSER
+  sudo_user: postgres
+- postgresql_db: name={{ database }} owner={{ user }} encoding='UTF-8' lc_collate='{{ penates_language }}.UTF-8' lc_ctype='{{ penates_language }}.UTF-8'
+  sudo_user: postgres

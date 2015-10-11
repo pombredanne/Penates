@@ -11,6 +11,10 @@
   - apt: pkg=shinken-mod-pickle-retention-file-generic
   - apt: pkg=shinken-mod-webui
   - apt: pkg=shinken-core
+  - apt: pkg=shinken-mod-ui-graphite
+  - apt: pkg=shinken-mod-graphite
+  - apt: pkg=shinken-mod-booster-nrpe
+  - apt: pkg=shinken-mod-hot-dependencies
   - template: src=templates/supervision_servers/contacts.cfg dest=/etc/shinken/contacts.cfg mode=0644
   - template: src=templates/supervision_servers/resource.cfg dest=/etc/shinken/resource.cfg mode=0644
   - template: src=templates/supervision_servers/shinken.cfg dest=/etc/shinken/shinken.cfg mode=0644
@@ -51,8 +55,26 @@
   - file: path=/etc/shinken/shinken.pem mode=0400
   - file: path=/etc/shinken/shinken.key mode=0400
 
+  - template: src=templates/supervision_servers/modules/webui.cfg dest=/etc/shinken/modules/webui.cfg mode=0644
   - command: shinken-arbiter -v -c /etc/shinken/shinken.cfg
   - service: name=shinken state=restarted
+
+  - include: "include/apache.yml"
+    vars:
+      apache_conf_template: templates/supervision_servers/shinken.conf
+      server_fqdn: "{{ sup_fqdn }}"
+
+#  - apt: pkg=graphite-web
+#  - apt: pkg=graphite-carbon
+#  - apt: pkg=python-psycopg2
+#  - template: src=templates/supervision_servers/graphite_settings.py dest=/etc/graphite/local_settings.py mode=0644
+#  - template: src=templates/supervision_servers/carbon_settings.ini dest=/etc/carbon/carbon.conf mode=0644
+#  - include: "include/postgresql.yml"
+#    vars:
+#      user: graphite
+#      database: graphite
+#      password: "{{ graphite_password }}"
+#  - command: graphite-manage syncdb
 
 - hosts: all_machines
   remote_user: root

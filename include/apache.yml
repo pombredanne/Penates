@@ -1,0 +1,22 @@
+- apt: pkg=apache2
+- apt: pkg=libapache2-mod-xsendfile
+- apt: pkg=libapache2-mod-auth-kerb
+- apache2_module: state=present name=auth_kerb
+- apache2_module: state=present name=headers
+- apache2_module: state=present name=proxy
+- apache2_module: state=present name=proxy_http
+- apache2_module: state=present name=ssl
+- command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/http/{{ server_fqdn }}/443/?keytab=HTTP&encryption=tls"
+- command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/apache2/http.keytab --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_keytab/http/{{ server_fqdn }}/443/"
+- command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/apache2/{{ server_fqdn }}.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/http/{{ server_fqdn }}/443/"
+- command: "openssl x509 -in /etc/apache2/{{ server_fqdn }}.pem"
+- command: "openssl rsa -in /etc/apache2/{{ server_fqdn }}.pem"
+- file: path=/etc/apache2/{{ server_fqdn }}.pem mode=0600 owner=www-data group=www-data
+- file: path=/etc/apache2/http.keytab mode=0600 owner=www-data group=www-data
+- command: "k5start -q -f /etc/apache2/http.keytab -U -- echo 'OK'"
+- template: src="{{ apache_conf_template }}" dest=/etc/apache2/sites-available/{{ server_fqdn }}.conf owner=www-data group=www-data mode=0644
+- file: path=/etc/apache2/sites-enabled/000-default.conf state=absent
+- file: path=/etc/apache2/sites-enabled/000-default state=absent
+- file: path=/etc/apache2/sites-enabled/{{ server_fqdn }}.conf src=/etc/apache2/sites-available/{{ server_fqdn }}.conf state=link
+- ufw: rule=allow port=443 proto=tcp
+- service: state=restarted name=apache2
