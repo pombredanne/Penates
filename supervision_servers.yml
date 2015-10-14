@@ -62,14 +62,21 @@
   - command: "openssl rsa -in /etc/shinken/shinken.pem -out /etc/shinken/shinken.key"
   - file: path=/etc/shinken/shinken.pem mode=0400
   - file: path=/etc/shinken/shinken.key mode=0400
-
-  - template: src=templates/supervision_servers/modules/webui.cfg dest=/etc/shinken/modules/webui.cfg mode=0644
-  - template: src=templates/supervision_servers/modules/import-glpi.cfg dest=/etc/shinken/modules/import-glpi.cfg mode=0644
-  - command: shinken-arbiter -v -c /etc/shinken/shinken.cfg
-
   - command: shinken install import-glpi
   - command: shinken install logstore-sqlite
   - command: shinken install livestatus
+  - command: shinken install syslog-sink
+  - command: shinken install booster-nrpe
+  - command: shinken install collectd
+  - command: shinken install asterisk
+  - command: shinken install pack-ldap
+  - command: shinken install pack-smtp
+  - command: shinken install pack-imap
+
+  - template: src=templates/supervision_servers/hosts/localhost.cfg dest=/etc/shinken/hosts/localhost.cfg mode=0644
+  - template: src=templates/supervision_servers/modules/webui.cfg dest=/etc/shinken/modules/webui.cfg mode=0644
+  - template: src=templates/supervision_servers/modules/import-glpi.cfg dest=/etc/shinken/modules/import-glpi.cfg mode=0644
+  - command: shinken-arbiter -v -c /etc/shinken/shinken.cfg
 
   - service: name=shinken state=restarted
   - ufw: rule=allow port=80 proto=tcp

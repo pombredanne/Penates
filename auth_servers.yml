@@ -139,16 +139,17 @@
     sudo_user: penatesserver
     tags:
       - penatesserver
-  - name: prepare PowerDNS database
-    command: penatesserver-manage migrate
+  - command: penatesserver-manage migrate
     sudo_user: penatesserver
     tags:
       - penatesserver
-  - name: create base domain
-    command: penatesserver-manage ensure_domain {{ penates_domain }}
+  - command: penatesserver-manage ensure_domain {{ penates_domain }}
     tags:
       - penatesserver
       - powerdns
+  - command: "penatesserver-manage admin_user --password {{ penates_auth_password }} --permission administration {{ penates_auth_login }}"
+  - command: "penatesserver-manage admin_user --password {{ penates_supervision_password }} --permission supervision {{ penates_supervision_login }}"
+  - command: "penatesserver-manage admin_user --password {{ penates_dhcp_password }} --permission dhcp {{ penates_dhcp_login }}"
 
   - name: ensure OpenLDAP is at the latest version
     apt: pkg=slapd

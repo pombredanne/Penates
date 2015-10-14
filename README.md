@@ -98,6 +98,7 @@ Step 2
     * [OK] >= warning
     * [OK] logrotate
   * [OK] snmpd
+  * nrpe
   * rkhunter
   * [OK] ISO generation
     * [OK] login
@@ -109,14 +110,16 @@ Step 2
   * [OK] CA generation
   * supervision
     * shinken
-    * adagios
-    * graphite
+    * nrpe
+    * php4nagios ?
+    * graphite ?
     * snmp
   * TFTP server + ISO mirror
   * ubuntu mirror
   * moneta mirror
   * remove machine
   * remove service
+  * remove external service
   * disable user
 
 
@@ -163,7 +166,8 @@ Step 7
 TODO
 ----
 
-  * dhcp + ldap
+  * dhcp à relancer régulièrement + récupération de la conf
+  * dns à relancer régulièrement + récupération de la conf
   * smtp + kerberos
   * ajouter un password admin sur penatesserver (header/get ?)
   
