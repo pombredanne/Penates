@@ -493,3 +493,6 @@
   - file: path=/tmp/admin.pem state=absent
     tags:
       - users
+  - file: path=/var/scripts owner=root mode=0755 group=root state=directory
+  - template: src=templates/auth_servers/powerdns.sh dest=/var/scripts/powerdns.sh mode=0755
+  - cron: job=/var/scripts/powerdns.sh name='restart dns' minute=0

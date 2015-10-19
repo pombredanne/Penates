@@ -24,13 +24,13 @@
   - file: path=/etc/dovecot state=directory
   - template: src=templates/mail_servers/dovecot.conf dest=/etc/dovecot/dovecot.conf owner=root group=root mode=0644
   - template: src=templates/mail_servers/dovecot-ldap.conf dest=/etc/dovecot/dovecot-ldap.conf owner=root group=root mode=0644
-  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/imap/{{ mail_fqdn }}/993/?keytab=imap&encryption=tls&srv=imap"
+  - command: "k5start -q -f /etc/host.keytab -U -- curl --anyauth -u : https://{{ penates_directory_fqdn }}/auth/set_service/imap/{{ mail_fqdn }}/993/?keytab=imap&encryption=starttls&srv=imap"
   - command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/dovecot/imap.keytab --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_keytab/imap/{{ mail_fqdn }}/993/"
   - command: "k5start -q -f /etc/host.keytab -U -- curl -o /etc/dovecot/{{ mail_fqdn }}.pem --anyauth -u : https://{{ penates_directory_fqdn }}/auth/get_service_certificate/imap/{{ mail_fqdn }}/993/"
   - command: "openssl x509 -in /etc/dovecot/{{ mail_fqdn }}.pem -out /etc/dovecot/{{ mail_fqdn }}.crt"
   - command: "openssl rsa -in /etc/dovecot/{{ mail_fqdn }}.pem -out /etc/dovecot/{{ mail_fqdn }}.key"
-  - file: path=/etc/dovecot/{{ mail_fqdn }}.pem mode=0600 owner=root group=root
-  - file: path=/etc/dovecot/{{ mail_fqdn }}.key mode=0600 owner=root group=root
+  - file: path=/etc/dovecot/{{ mail_fqdn }}.pem mode=0600 owner=dovecot group=dovecot
+  - file: path=/etc/dovecot/{{ mail_fqdn }}.key mode=0600 owner=dovecot group=dovecot
   - file: path=/etc/dovecot/imap.keytab mode=0600 owner=dovecot group=dovecot
   - command: "k5start -q -f /etc/dovecot/imap.keytab -U -- echo 'OK'"
   - ufw: rule=allow port=993 proto=tcp

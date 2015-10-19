@@ -146,7 +146,7 @@ Step 5
   * Updoc
   * Vagrant mirror
   * Pypi mirror
-  * Asterix
+  * Asterisk
   
 Step 6
 ------
@@ -166,8 +166,7 @@ Step 7
 TODO
 ----
 
-  * dhcp à relancer régulièrement + récupération de la conf
-  * dns à relancer régulièrement + récupération de la conf
+  * récupération de la conf pour les DNS secondaires
   * smtp + kerberos
   * ajouter un password admin sur penatesserver (header/get ?)
   
